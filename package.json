@@ -4,6 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "tailwind": "npx @tailwindcss/cli -i src/input.css -o ./src/output.css --watch",
+    "dev": "npm run tailwind\" \"npm run start\"",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -22,27 +24,33 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/common": "^20.2.0",
-    "@angular/compiler": "^20.2.0",
-    "@angular/core": "^20.2.0",
-    "@angular/forms": "^20.2.0",
-    "@angular/platform-browser": "^20.2.0",
-    "@angular/router": "^20.2.0",
-    "rxjs": "~7.8.0",
-    "tslib": "^2.3.0",
-    "zone.js": "~0.15.0"
+    "@angular/common": "20.2.2",
+    "@angular/compiler": "20.2.2",
+    "@angular/core": "20.2.2",
+    "@angular/forms": "20.2.2",
+    "@angular/google-maps": "20.2.2",
+    "@angular/platform-browser": "20.2.2",
+    "@angular/router": "20.2.2",
+    "@tailwindcss/cli": "4.1.13",
+    "jsencrypt": "3.5.4",
+    "leaflet": "1.9.4",
+    "rxjs": "7.8.1",
+    "tailwindcss": "4.1.13",
+    "tslib": "2.3.0",
+    "zone.js": "0.15.0"
   },
   "devDependencies": {
-    "@angular/build": "^20.2.2",
-    "@angular/cli": "^20.2.2",
-    "@angular/compiler-cli": "^20.2.0",
-    "@types/jasmine": "~5.1.0",
-    "jasmine-core": "~5.9.0",
-    "karma": "~6.4.0",
-    "karma-chrome-launcher": "~3.2.0",
-    "karma-coverage": "~2.2.0",
-    "karma-jasmine": "~5.1.0",
-    "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.9.2"
+    "@angular/build": "20.2.2",
+    "@angular/cli": "20.2.2",
+    "@angular/compiler-cli": "20.2.2",
+    "@types/jasmine": "5.1.0",
+    "@types/leaflet": "1.9.20",
+    "jasmine-core": "5.9.0",
+    "karma": "6.4.0",
+    "karma-chrome-launcher": "3.2.0",
+    "karma-coverage": "2.2.0",
+    "karma-jasmine": "5.1.0",
+    "karma-jasmine-html-reporter": "2.1.0",
+    "typescript": "5.9.2"
   }
 }

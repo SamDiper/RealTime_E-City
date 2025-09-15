@@ -1,0 +1,106 @@
+<link href="../../../output.css" rel="stylesheet" />
+
+<main class="min-h-screen bg-gray-300 flex items-center justify-center py-8">
+  <div class="relative isolate mx-4 w-full max-w-6xl overflow-hidden bg-white shadow-2xl sm:rounded-2xl">
+    <div class="grid grid-cols-1 lg:grid-cols-2">
+      <section class="px-6 py-10 sm:px-10 md:px-14">
+        <a class="inline-flex items-center gap-3">
+          <img
+            src="https://img.freepik.com/vector-premium/signo-simbolo-punto-ubicacion_617585-1093.jpg"
+            alt="Logo"
+            class="h-20 w-20 rounded object-cover"
+          />
+          <span class="text-6xl font-semibold">RealTime</span>
+        </a>
+
+        <h1 class="mt-8 text-2xl font-semibold text-gray-900">Inicia sesión</h1>
+        <div class="relative"><div class="my-6 border-t"></div></div>
+
+        <form (ngSubmit)="onSubmit()" novalidate class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Usuario</label>
+            <input
+              type="text"
+              [formControl]="user"
+              required
+              autocomplete="username"
+              placeholder="Ingresar usuario"
+              class="mt-1 w-full rounded-lg placeholder:text-gray-500 border px-4 py-3 outline-none focus:border-cyan-500"
+              [class.border-red-500]="user.invalid && (user.dirty || user.touched)"
+              [disabled]="loading()"
+            />
+            @if (user.invalid && (user.dirty || user.touched)) {
+              <p class="mt-1 text-xs text-red-600">El usuario es obligatorio.</p>
+            }
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Contraseña</label>
+            <div class="relative">
+              <input
+                [type]="showPassword() ? 'text' : 'password'"
+                [formControl]="password"
+                required
+                autocomplete="current-password"
+                placeholder="••••••••"
+                class="mt-1 w-full placeholder:text-gray-500 rounded-lg border px-4 py-3 pr-12 outline-none focus:border-cyan-500"
+                [class.border-red-500]="password.invalid && (password.dirty || password.touched)"
+                [disabled]="loading()"
+                
+              />
+
+              
+            </div>
+            @if (password.invalid && (password.dirty || password.touched)) {
+              <p class="mt-1 text-xs text-red-600">La contraseña es obligatoria.</p>
+            }
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="loading() || user.invalid || password.invalid"
+            class="w-full rounded-lg bg-black cursor-pointer px-4 py-3 font-semibold text-white disabled:opacity-60 "
+            [attr.aria-busy]="loading()"
+          >
+            @if (loading()) {
+              <span class="inline-flex items-center gap-2">
+                <svg class="h-5 w-5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle class="opacity-100 " cx="12" cy="12" r="10" stroke="white" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="white" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+                Ingresando…
+              </span>
+            } @else {
+              Iniciar sesión
+            }
+          </button>
+
+          @if (errorMessage()) {
+            <p class="text-sm text-red-600" aria-live="polite">{{ errorMessage() }}</p>
+          }
+
+          <p class="mt-6 text-xs leading-5 text-gray-600 text-center">
+            © {{ _currentYear }} - E-city software - Creado por
+            <a href="https://www.1cero1.com/" class="font-medium text-cyan-700 underline">1cero1 Software</a>
+          </p>
+        </form>
+      </section>
+
+      <aside class="relative hidden lg:block">
+        <img
+          src="https://previews.123rf.com/images/microone/microone1710/microone171000578/88774135-perspective-3d-city-map-with-pin-pointers-abstarct-gps-navigation-vector-concept-illustration-of.jpg"
+          srcset="
+            https://i.blogs.es/635f55/maps/1366_2000.jpg 1280w,
+            https://i.blogs.es/635f55/maps/1366_2000.jpg 1920w,
+            https://i.blogs.es/635f55/maps/1366_2000.jpg 2560w
+          "
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          alt="Mapa con puntos de ubicación"
+          class="absolute inset-0 h-full w-full object-cover"
+          loading="lazy"
+        />
+        <div class="absolute inset-0 bg-gradient-to-br from-black/80 to-transparent"></div>
+      </aside>
+    </div>
+  </div>
+</main>

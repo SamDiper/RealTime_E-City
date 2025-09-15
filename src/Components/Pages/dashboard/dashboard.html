@@ -1,0 +1,115 @@
+
+<link href="../../../output.css" rel="stylesheet"/>
+<style>
+  li {
+    flex: 1;
+    color: black;
+    font-weight: bold;
+    height: 10dvh;
+    background: rgba(255, 255, 255, 0.873); 
+    box-shadow: 5px 5px 5px 5px rgb(143, 143, 143);
+    border-radius: 0.5rem; 
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem; 
+    margin: 0.5rem;
+  }
+
+</style>
+
+<main class="bg-gradient-to-r from-gray-600 to-gray-800 p-1">
+  <div class="max-w-6xl mx-auto">
+    
+    <div class="flex flex-col lg:flex-row gap-4">
+      
+      <div class="flex justify-center rounded-lg border border-gray-200 bg-white shadow-md items-center p-6 lg:w-1/3">
+        <img src="e-cityLogo.png" alt="logo1cero1">
+      </div>
+
+      <div class="bg-white rounded-lg shadow-md p-4 flex-1 text-black">
+        <div class="flex justify-between h-full">
+          <button type="button" onclick="alert('btnPrueba')" class="cursor-pointer flex-1 text-white font-bold bg-gradient-to-r from-gray-600 to-gray-800 rounded-lg flex flex-col items-center justify-center p-4 m-2">
+            <i class="fas fa-hand-holding-usd text-white text-4xl"></i>
+            <p class="mt-2">Ver Gráficas</p>
+          </button>
+
+          <div type="button" onclick="alert('btnMapa')" class="cursor-pointer flex-1 text-white font-bold bg-gradient-to-r from-gray-600 to-gray-800 rounded-lg flex flex-col items-center justify-center p-4 m-2">
+            <i class="fas fa-exchange-alt text-white text-4xl"></i>
+            <p class=" mt-2">Ver Mapa</p>
+          </div>
+
+          <div type="button" (click)="Exit()" class="cursor-pointer flex-1 text-white font-bold bg-gradient-to-r from-gray-600 to-gray-800 rounded-lg flex flex-col items-center justify-center p-4 m-2">
+            <i class="fas fa-qrcode text-4xl"></i>
+            <p class=" mt-2">Cerrar Sesión</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg p-4 shadow-md my-6 m-10">
+      <h2 class="text-lg font-bold text-gray-600 mb-4">Transacciones</h2>
+      <table class="w-full">
+        <tbody>
+          <tr class="border-b">
+            <td class="px-4 py-2 text-left">
+              <div>
+                <h2>Total Transacciones</h2>
+                <p>24/07/2023</p>
+              </div>
+            </td>
+            <td class="px-4 py-2 text-right text-cyan-500">
+              <span>150$</span>
+            </td>
+          </tr>
+          <tr class="border-b">
+            <td class="px-4 py-2 text-left">
+              <div>
+                <h2>Total Recaudado</h2>
+                <p>24/06/2023</p>
+              </div>
+            </td>
+            <td class="px-4 py-2 text-right text-cyan-500">
+              <span>15$</span>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-4 py-2 text-left">
+              <div>
+                <h2>Total Retirado</h2>
+                <p>02/05/2023</p>
+              </div>
+            </td>
+            <td class="px-4 py-2 text-right text-cyan-500">
+              <span>50$</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+<div id="map" style="height: 80vh;" class="border-3 w-[80%] rounded-4xl m-10 flex justify-center bg-transparent shadow-2xl" ></div>
+
+<div class="flex-1 text-white font-bold bg-gradient-to-r from-gray-600 to-gray-800 rounded-lg flex flex-col items-center justify-center p-4 m-2">
+  <i class="fas fa-hand-holding-usd text-white text-4xl">Estados</i>
+  <p class="mt-2"></p>
+</div>
+<div class="flex-1 text-black bg-white rounded-lg flex flex-col items-center justify-center p-4 m-2">
+  <ul class="grid-cols-1 align-middle text-center items-center font-bold flex row-auto flex-wrap">
+    <li><img src="https://maps.google.com/mapfiles/ms/icons/blue.png"><p>Todas</p></li>
+    <li><img src="https://maps.google.com/mapfiles/ms/icons/green.png"><p>Activas</p></li>
+    <li><img src="https://maps.google.com/mapfiles/ms/icons/yellow.png"><p>Periferico Desconectado</p></li>
+    <li><img src="https://maps.google.com/mapfiles/ms/icons/red.png"><p>Apagadas</p></li>
+    <li><img src="https://maps.google.com/mapfiles/ms/icons/purple.png"><p>Sin Internet</p></li>
+    <li><img src="https://maps.google.com/mapfiles/ms/icons/grey.png"><p>Sin Dinero</p></li>
+  </ul>
+</div>
+
+<footer style="height: 10vh;" class="w-full bg-black flex justify-center">
+    <p class="mt-6 text-xs leading-5 text-gray-100 text-center">
+      © {{ _currentYear }} - E-city software - Creado por
+      <a href="https://www.1cero1.com/" class="font-medium text-white underline">1cero1 Software</a>
+    </p>
+</footer>
