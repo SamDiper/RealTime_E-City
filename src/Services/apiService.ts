@@ -138,7 +138,7 @@ export class Api {
     );
   }
 
-  GetAllTransactions(idPaypad:number): Observable<TransactionResponse> {
+  GetTransactionsById(idPaypad:number): Observable<TransactionResponse> {
     const headers = this.getHeaders(true);
     
     return this.http.get<TransactionResponse>(
@@ -146,4 +146,28 @@ export class Api {
       { headers }
     );
   }
+
+  GetTransactionAmounts(paypadId: number): Observable<TransactionResponse> {
+    const headers = this.getHeaders(true);
+
+    const startDate = new Date('2021-01-01T05:00:00.000Z').toISOString();
+
+    const endDate = new Date();
+    endDate.setUTCHours(23, 59, 59, 999);
+
+    const body = {
+      id: paypadId,        
+      from: startDate,     
+      to: endDate.toISOString()
+    };
+
+    return this.http.post<TransactionResponse>(
+      `${environment.API_URL}/api/Transaction/GetByDate`,
+      body,
+      { headers }
+    );
+  }
+
+
+
 }
