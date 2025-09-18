@@ -196,7 +196,6 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
   private redrawMarkers(): void {
     if (!this.map) return;
 
-    // limpiar marcadores previos
     this.markers.forEach(m => m.remove());
     this.markers = [];
 

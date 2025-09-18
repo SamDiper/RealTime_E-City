@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild } from "@angular/core";
 import { Router } from "@angular/router";
 import { CommonModule } from "@angular/common";
-import { FormsModule } from "@angular/forms"; // 👈 nuevo
+import { FormsModule } from "@angular/forms"; 
 
 import {
   NgApexchartsModule,
@@ -16,14 +16,16 @@ import {
   ApexYAxis,
   ApexTooltip,
   ApexFill,
-  ApexMarkers
+  ApexMarkers,
+  ApexOptions
 } from "ng-apexcharts";
 
 import { Api } from "../../../Services/apiService";
 import { PayPadResponse } from "../../../Interfaces/locations";
 import { TransactionResponse, Transaction } from "../../../Interfaces/transactions";
 import { PayPad } from "../../../Interfaces/charts";
-import { count } from "rxjs";
+import { ApexNonAxisChartSeries } from 'ng-apexcharts';
+
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -51,10 +53,12 @@ export class Charts implements OnInit {
   @ViewChild("_chart", { static: false }) _chartPays!: ChartComponent;
   @ViewChild("_chartWithdraw", { static: false }) _chartWithdrawals!: ChartComponent;
   @ViewChild("_chartTransaction", { static: false }) _chartTransactions!: ChartComponent;
+  @ViewChild("_donutCompare", { static: false }) _donutCompare!: ChartComponent;
 
   showCircularPay = false;
   showCircularWithdraw = false;
   showCircularTransaction = false;
+  _donutTxTotal = 0;
 
   _currentYear: number = new Date().getFullYear();
 
@@ -65,6 +69,7 @@ export class Charts implements OnInit {
   _activeOptionButtonPay: "1m" | "6m" | "1y" | "all" = "all";
   _activeOptionButtonWithdraw: "1m" | "6m" | "1y" | "all" = "all";
   _activeOptionButtonTransaction: "1m" | "6m" | "1y" | "all" = "all";
+  _comparisonRange: "1m" | "6m" | "1y" | "all" = "all";
 
   _paypads: PayPad[] = [];
   _transactions: Transaction[] = [];
@@ -143,7 +148,6 @@ export class Charts implements OnInit {
     );
     if (!matchTx) return;
 
-    // buscamos el PayPad por id o por username
     const forced =
       this._paypads.find(p => p.id === (matchTx.idPayPad ?? 1)) ||
       this._paypads.find(p => p.username === "Pay+ Prueba1");
@@ -184,6 +188,7 @@ export class Charts implements OnInit {
     this.FillPayChart();
     this.FillWithdrawChart();
     this.FillTransactionChart();
+    this.refreshComparison();
   }
 
   private startOfDay(ts: number): number {
@@ -205,6 +210,18 @@ export class Charts implements OnInit {
     return { xaxis: { min: undefined, max: undefined } };
   }
 
+  private countInRange(points: { x: number; y: number }[], range: "1m" | "6m" | "1y" | "all") {
+    if (range === "all") return points.reduce((acc, p) => acc + (Number(p.y) || 0), 0);
+    const now = Date.now();
+    const min =
+    range === "1m" ? this.monthsAgo(now, 1)
+    : range === "6m" ? this.monthsAgo(now, 6)
+    : this.yearsAgo(now, 1);
+    return points
+    .filter(p => p.x >= min && p.x <= now)
+    .reduce((acc, p) => acc + (Number(p.y) || 0), 0);
+  }
+
   private baseAreaOptions(): ChartOptions {
     return {
     series: [{ name: "", data: [] }],
@@ -221,15 +238,13 @@ export class Charts implements OnInit {
       mode: "dark",
       palette: "palette5"             
     },
-
-    colors: ["#3bff00"],
     
     dataLabels: { enabled: false },
     markers: { size: 0 },
 
     stroke: { 
       curve: "smooth",
-      width: 1.5                       
+      width: 1.5                  
     },
 
     grid: { borderColor: "#374151" }, 
@@ -251,13 +266,17 @@ export class Charts implements OnInit {
       theme: "dark" 
     },
 
-    fill: { 
+    fill: {
       type: "gradient",
-      gradient: { 
-        shadeIntensity: 0.15,
-        opacityFrom: 0.7,
-        opacityTo: 0.25,
-        stops: [0, 100]
+      gradient: {
+        shade: 'dark',              
+        type: "vertical",             // 'horizontal', 'vertical', 'diagonal1', 'diagonal2'
+        shadeIntensity: 0.7,          
+        gradientToColors: ["#00c6ff"], 
+        inverseColors: true,
+        opacityFrom: 0.9,
+        opacityTo: 0.3,
+        stops: [50,80,100]         
       }
     }
   };
@@ -269,6 +288,24 @@ export class Charts implements OnInit {
       series: [{ name: "Pagos", data: this._chartNumbersPays }],
       annotations: { yaxis: [{ y: 30, borderColor: "#999" }], xaxis: [{ x: this.yearsAgo(Date.now(), 1), borderColor: "#999" }] },
       yaxis: { labels: { formatter: (v: number) => "$" + Math.round(v).toLocaleString() } },
+      stroke: { 
+        colors:["green"],
+        curve: "smooth",
+        width: 1               
+      },
+      fill: {
+        type: "gradient",
+        gradient: {
+          shade: 'dark',               
+          type: "vertical",             
+          shadeIntensity: 0.7,
+          gradientToColors: ["#36ee4e"], 
+          inverseColors: true,
+          opacityFrom: 0.9,
+          opacityTo: 0.3,
+          stops: [80]         
+        }
+      }
     };
   }
   private FillWithdrawChart() {
@@ -276,7 +313,25 @@ export class Charts implements OnInit {
       ...this.baseAreaOptions(),
       series: [{ name: "Retiros", data: this._chartNumbersWithdrawals }],
       annotations: { yaxis: [{ y: 30, borderColor: "#999" }], xaxis: [{ x: this.yearsAgo(Date.now(), 1), borderColor: "#999" }] },
-      yaxis: { labels: { formatter: (v: number) => "$" + Math.round(v).toLocaleString() } }
+      yaxis: { labels: { formatter: (v: number) => "$" + Math.round(v).toLocaleString() } },
+      stroke: { 
+        colors:["#932121"],
+        curve: "smooth",
+        width: 1               
+      },
+      fill: {
+        type: "gradient",
+        gradient: {
+          shade: 'dark',               
+          type: "vertical",             
+          shadeIntensity: 0.7,
+          gradientToColors: ["red"], 
+          inverseColors: true,
+          opacityFrom: 0.9,
+          opacityTo: 0.3,
+          stops: [80]         
+        }
+      }
     };
   }
   private FillTransactionChart() {
@@ -284,7 +339,25 @@ export class Charts implements OnInit {
       ...this.baseAreaOptions(),
       series: [{ name: "Transacciones", data: this._chartNumbersTransactions }],
       annotations: { yaxis: [{ y: 30, borderColor: "#999" }], xaxis: [{ x: this.yearsAgo(Date.now(), 1), borderColor: "#999" }] },
-      yaxis: { labels: { formatter: (v: number) => Math.round(v).toLocaleString() } }
+      yaxis: { labels: { formatter: (v: number) => Math.round(v).toLocaleString() } },
+      stroke: { 
+        colors:["#2e6dc1"],
+        curve: "smooth",
+        width: 1               
+      },
+      fill: {
+        type: "gradient",
+        gradient: {
+          shade: 'dark',               
+          type: "vertical",             
+          shadeIntensity: 0.7,
+          gradientToColors: ["#36a6ee"], 
+          inverseColors: true,
+          opacityFrom: 0.9,
+          opacityTo: 0.3,
+          stops: [80]         
+        }
+      }
     };
   }
 
@@ -301,6 +374,12 @@ export class Charts implements OnInit {
     this._chartTransactions?.updateOptions(this.rangeOptions(option), false, true, true);
   }
 
+  public UpdateOptionsComparison(option: "1m" | "6m" | "1y" | "all") {
+    this._comparisonRange = option;
+    this._donutCompare?.updateOptions(this.rangeOptions(option), false, true, true);
+    this.refreshComparison();
+  }
+
   onPaypadChange(idStr: string) {
     this.selectedPaypadId = idStr;          
     const id = Number(idStr);
@@ -308,7 +387,55 @@ export class Charts implements OnInit {
     if (!isNaN(id)) this.GetTransactionsByPaypadId(id);
   }
 
-  verCharts() { document.getElementById('charts-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-  Exit() { localStorage.clear(); this._router.navigate(["/login"]); }
-  GoToMaps() { this._router.navigate(["/dashboard"]); }
+
+  _donutCompareSeries: ApexNonAxisChartSeries = [0, 0]; 
+  _donutCompareOptions: ApexOptions = {
+    chart: { type: "donut", background: "#1f2937" }, 
+    labels: ["Pagos", "Retiros"],
+    colors: ["#56cd3d", "#df3d3d"], 
+    theme: { mode: "dark" },
+    dataLabels: { enabled: false },
+    plotOptions: {
+      pie: {
+        donut: { size: "68%", labels: { show: true, total: { show: true, showAlways:true, label: "Transacciones Totales", formatter: () => new Intl.NumberFormat('es-CO').format(this._donutTxTotal) } } }
+      }
+    },
+    legend: { show: true, labels: { colors: "#d1d5db" } },
+    tooltip: {
+      theme: "dark",
+      y: { formatter: (val: number) => "$" + Math.round(val).toLocaleString() }
+    }
+  };
+
+  private sumInRange(points: { x: number; y: number }[], range: "1m" | "6m" | "1y" | "all") {
+    if (range === "all") return points.reduce((acc, p) => acc + (Number(p.y) || 0), 0);
+    const now = Date.now();
+    const min =
+      range === "1m" ? this.monthsAgo(now, 1)
+      : range === "6m" ? this.monthsAgo(now, 6)
+      : this.yearsAgo(now, 1);
+    return points
+      .filter(p => p.x >= min && p.x <= now)
+      .reduce((acc, p) => acc + (Number(p.y) || 0), 0);
+  }
+
+  private refreshComparison() {
+    const pagos = this.sumInRange(this._chartNumbersPays, this._comparisonRange);
+    const retiros = this.sumInRange(this._chartNumbersWithdrawals, this._comparisonRange);
+    this._donutTxTotal = this.countInRange(this._chartNumbersTransactions, this._comparisonRange);
+    this._donutCompareSeries = [pagos, retiros];
+  }
+
+
+  verCharts() {
+    document.getElementById('charts-section')
+    ?.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
+  }
+  Exit() { 
+    localStorage.clear();
+    this._router.navigate(["/login"]); 
+  }
+  GoToMaps() {
+    this._router.navigate(["/dashboard"]); 
+  }
 }

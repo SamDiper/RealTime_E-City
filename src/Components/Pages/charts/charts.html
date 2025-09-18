@@ -42,11 +42,16 @@
         (change)="onPaypadChange(selectedPaypadId)" class="font-bold text-center w-full rounded-md bg-gradient-to-r from-gray-600 to-gray-800 text-white py-2 px-3 *:bg-gray-800 *:font-bold placeholder:text-gray-500 focus:outline-2 focus:outline-offset-0 focus:outline-white"
         >
           <option value="" [disabled]="selectedPaypadId !== ''">Seleccione un Pay+</option>
+          @if(_paypads.length===0){
+              <option value="" disabled selected>¡Error! Recargar Pagina</option>
+          }
           @for (t of _paypads; track t.id) {
             @if(t.username.includes("Prueba") || t.username.includes("prueba")){
             }@else { 
               <option [value]="t.id">{{ t.username }}</option>
             }
+
+
           }
         </select>
       </div>
@@ -60,13 +65,13 @@
           <h2 class="text-lg font-bold">Gráfico de Pagos</h2>
           <div class="flex gap-2">
             <button (click)="UpdateOptionsPay('1m')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonPay === '1m' ? 'bg-blue-600' : 'bg-slate-700'">1M</button>
+                    [ngClass]="_activeOptionButtonPay === '1m' ? 'bg-green-500' : 'bg-slate-700'">1M</button>
             <button (click)="UpdateOptionsPay('6m')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonPay === '6m' ? 'bg-blue-600' : 'bg-slate-700'">6M</button>
+                    [ngClass]="_activeOptionButtonPay === '6m' ? 'bg-green-500' : 'bg-slate-700'">6M</button>
             <button (click)="UpdateOptionsPay('1y')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonPay === '1y' ? 'bg-blue-600' : 'bg-slate-700'">1Y</button>
+                    [ngClass]="_activeOptionButtonPay === '1y' ? 'bg-green-500' : 'bg-slate-700'">1Y</button>
             <button (click)="UpdateOptionsPay('all')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonPay === 'all' ? 'bg-blue-600' : 'bg-slate-700'">All</button>
+                    [ngClass]="_activeOptionButtonPay === 'all' ? 'bg-green-500' : 'bg-slate-700'">All</button>
           </div>
         </div>
 
@@ -92,13 +97,13 @@
           <h2 class="text-lg font-bold">Gráfico de Retiros</h2>
           <div class="flex gap-2">
             <button (click)="UpdateOptionsWithdraw('1m')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonWithdraw === '1m' ? 'bg-blue-600' : 'bg-slate-700'">1M</button>
+                    [ngClass]="_activeOptionButtonWithdraw === '1m' ? 'bg-red-600' : 'bg-slate-700'">1M</button>
             <button (click)="UpdateOptionsWithdraw('6m')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonWithdraw === '6m' ? 'bg-blue-600' : 'bg-slate-700'">6M</button>
+                    [ngClass]="_activeOptionButtonWithdraw === '6m' ? 'bg-red-600' : 'bg-slate-700'">6M</button>
             <button (click)="UpdateOptionsWithdraw('1y')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonWithdraw === '1y' ? 'bg-blue-600' : 'bg-slate-700'">1Y</button>
+                    [ngClass]="_activeOptionButtonWithdraw === '1y' ? 'bg-red-600' : 'bg-slate-700'">1Y</button>
             <button (click)="UpdateOptionsWithdraw('all')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonWithdraw === 'all' ? 'bg-blue-600' : 'bg-slate-700'">All</button>
+                    [ngClass]="_activeOptionButtonWithdraw === 'all' ? 'bg-red-600' : 'bg-slate-700'">All</button>
           </div>
         </div>
 
@@ -118,8 +123,7 @@
           [theme]="_chartOptionsPay.theme"
         ></apx-chart>
       </div>
-
-      <div class="bg-slate-900 rounded-lg p-4 shadow-lg md:col-span-2">
+      <div class="bg-slate-900 rounded-lg p-4 shadow-lg">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-lg font-bold">Gráfico de Transacciones</h2>
           <div class="flex gap-2">
@@ -150,9 +154,35 @@
           [theme]="_chartOptionsPay.theme"
         ></apx-chart>
       </div>
+      <div class="bg-slate-900 rounded-lg p-4 shadow-lg">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-bold">Comparativa Pagos vs Retiros</h2>
+          <div class="flex gap-2">
+            <button (click)="UpdateOptionsComparison('1m')" class="px-2 py-1 rounded text-xs"
+                    [ngClass]="_comparisonRange === '1m' ? 'bg-blue-600' : 'bg-slate-700'">1M</button>
+            <button (click)="UpdateOptionsComparison('6m')" class="px-2 py-1 rounded text-xs"
+                    [ngClass]="_comparisonRange === '6m' ? 'bg-blue-600' : 'bg-slate-700'">6M</button>
+            <button (click)="UpdateOptionsComparison('1y')" class="px-2 py-1 rounded text-xs"
+                    [ngClass]="_comparisonRange === '1y' ? 'bg-blue-600' : 'bg-slate-700'">1Y</button>
+            <button (click)="UpdateOptionsComparison('all')" class="px-2 py-1 rounded text-xs"
+                    [ngClass]="_comparisonRange === 'all' ? 'bg-blue-600' : 'bg-slate-700'">All</button>
+          </div>
+        </div>
 
+        <apx-chart
+          #_donutCompare
+          [series]="_donutCompareSeries"
+          [chart]="_donutCompareOptions.chart!"
+          [labels]="_donutCompareOptions.labels!"
+          [colors]="_donutCompareOptions.colors!"
+          [plotOptions]="_donutCompareOptions.plotOptions!"
+          [dataLabels]="_donutCompareOptions.dataLabels!"
+          [theme]="_donutCompareOptions.theme!"
+          [legend]="_donutCompareOptions.legend!"
+          [tooltip]="_donutCompareOptions.tooltip!"
+        ></apx-chart>
+      </div>
     </section>
-
   </div>
 </main>
 <footer style="height: 10vh;" class="w-full bg-black flex justify-center">
