@@ -147,6 +147,16 @@ export class Api {
     );
   }
 
+  
+  GetAllTransactions(): Observable<TransactionResponse> {
+    const headers = this.getHeaders(true);
+    
+    return this.http.get<TransactionResponse>(
+      `${environment.API_URL}/api/Transaction`,
+      { headers }
+    );
+  }
+
   GetTransactionAmounts(paypadId: number): Observable<TransactionResponse> {
     const headers = this.getHeaders(true);
 
