@@ -236,32 +236,58 @@ export class Charts implements OnInit {
         labels: ['Pagos', 'Retiros'],
         datasets: [{
           data: this._donutCompareSeries,
-          backgroundColor: ['#3b82f6', '#ef4444'],
+          backgroundColor: ['#22c55e', '#dc2626'],
           borderWidth: 0
         }]
       },
       options: {
         responsive: true,
-        maintainAspectRatio: true,
+        maintainAspectRatio: true, // 👈 Importante: mantiene proporción
+        aspectRatio: 2, // 👈 CLAVE: 2 = más ancho que alto (más pequeño verticalmente)
+        cutout: '70%', // 👈 Grosor del donut (70% = más delgado)
         plugins: {
           legend: {
             position: 'bottom',
-            labels: { color: '#1f2937', font: { size: 12 } }
+            labels: { 
+              color: '#6b7280',
+              font: { size: 11 }, // 👈 Tamaño de texto de leyenda
+              padding: 10, // 👈 Espaciado entre ítems
+              usePointStyle: true,
+              pointStyle: 'circle',
+              boxWidth: 8 // 👈 Tamaño de los círculos de colores
+            }
           },
           tooltip: {
+            backgroundColor: '#fff',
+            titleColor: '#1f2937',
+            bodyColor: '#1f2937',
+            borderColor: '#e5e7eb',
+            borderWidth: 1,
+            padding: 10,
+            displayColors: false,
             callbacks: {
               label: (context) => {
-                const label = context.label || '';
                 const value = context.parsed || 0;
-                return `${label}: $${Math.round(value).toLocaleString()}`;
+                const total = context.dataset.data.reduce((a: number, b: any) => a + Number(b), 0);
+                const percentage = ((value / total) * 100).toFixed(1);
+                return `$${Math.round(value).toLocaleString()} (${percentage}%)`;
               }
             }
           },
           title: {
             display: true,
-            text: `Total Transacciones: ${this._donutTxTotal.toLocaleString()}`,
-            color: '#1f2937',
-            font: { size: 14, weight: 'bold' }
+            text: `${this._donutTxTotal.toLocaleString()} tx`, // 👈 Más corto
+            color: '#6b7280',
+            font: { size: 12 }, // 👈 Más pequeño
+            padding: { top: 0, bottom: 10 }
+          }
+        },
+        layout: {
+          padding: {
+            top: 0,
+            bottom: 10,
+            left: 20,
+            right: 20
           }
         }
       }

@@ -9,6 +9,7 @@ import {
   NgZone,
   signal,
   computed,
+  HostListener, // 👈 AGREGAR
 } from '@angular/core';
 import * as L from 'leaflet';
 import { FormsModule } from '@angular/forms';
@@ -19,12 +20,8 @@ import { Router } from '@angular/router';
 import { Api } from '../../../Services/apiService';
 import { PayPadResponse, PayPad } from '../../../Interfaces/locations';
 import { Transaction, TransactionResponse } from '../../../Interfaces/transactions';
-// import { SubscriptionResponse } from '../../../Interfaces/Subscriptions';
-// import { AlertsHubService } from '../../../Services/hubServices';
 
 type PaymentOption = { label: string; value: string | null };
-
-// Extensión de L.Marker para almacenar la URL del icono
 type MarkerWithUrl = L.Marker & { customIconUrl: string };
 
 @Component({
@@ -43,27 +40,24 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
   route = inject(Router);
   http = inject(HttpClient);
 
-  // constructor(private alertsHub: AlertsHubService) {}
-
   _currentYear: number = new Date().getFullYear();
 
-  // Tamaños de iconos
   private defaultIconSize: [number, number] = [30, 30];
   private bigIconSize: [number, number] = [60, 60];
 
-  // Datos base
   paypads: PayPad[] = [];
   filteredPaypads: PayPad[] = [];
   subscriptions: any;
 
   private filterState = -1;
 
-  // Estado de UI detalle
   selectedPayPad = signal<PayPad | null>(null);
   loading = signal(false);
   error = signal<string | null>(null);
 
-  // Transacciones del PayPad seleccionado
+  // 🔥 NUEVA PROPIEDAD PARA EL MODAL
+  showModal = signal(false);
+
   transactions = signal<Transaction[]>([]);
   cantIniciada = 0;
   cantCancelada = 0;
@@ -72,7 +66,6 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
 
   selectedPaymentType = signal<string | null>(null);
 
-  // Opciones de medio de pago
   paymentTypeOptions = computed<PaymentOption[]>(() => {
     const txs = this.transactions();
     if (!txs.length) return [{ label: 'Todos', value: null }];
@@ -80,7 +73,6 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     return [{ label: 'Todos', value: null }, ...unique.map((v) => ({ label: v!, value: v! }))];
   });
 
-  // Transacciones filtradas y totales
   filteredTransactions = computed<Transaction[]>(() => {
     this.cantAprobada = 0;
     this.cantCancelada = 0;
@@ -121,7 +113,6 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     this.filteredTransactions().reduce((acc, t) => acc + this.num(t.returnAmount ?? 0), 0)
   );
 
-  // Ciclo de vida
   ngOnInit(): void {
     const _user = localStorage.getItem('User');
     if (_user == null) {
@@ -130,7 +121,6 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     }
 
     this.cargarUbicaciones();
-    // this.cargarSubscripciones();
   }
 
   ngAfterViewInit(): void {
@@ -140,7 +130,6 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
       requestAnimationFrame(() => this.map?.invalidateSize());
       setTimeout(() => this.map?.invalidateSize(), 250);
     });
-    
   }
 
   ngOnDestroy(): void {
@@ -158,7 +147,6 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     }
   }
 
-  // Acciones top
   Exit() {
     localStorage.clear();
     this.route.navigate(['/login']);
@@ -209,27 +197,9 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     });
   }
 
-  // private async cargarSubscripciones(): Promise<void> {
-  //   (await this._api.GetAllSubscriptions()).subscribe({
-  //     next: (data: SubscriptionResponse) => {
-  //       this.subscriptions = data.response;
-  //       this.mergeSubscriptions();
-  //       this.applyFilter();
-  //       this.redrawMarkers();
-  //     },
-  //     error: (err) => {
-  //       console.error('Error al cargar subscripciones:', err);
-  //     },
-  //   });
-  // }
-
-  /**
-   * Redibuja los marcadores en el mapa
-   */
   private redrawMarkers(): void {
     if (!this.map) return;
 
-    // Remover marcadores anteriores
     this.markers.forEach((m) => m.remove());
     this.markers = [];
     this.markersMap.clear();
@@ -261,66 +231,65 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     }
   }
 
-  /**
-   * Centrar y resaltar marcador seleccionado
-   */
   focusOnPaypad(paypad: PayPad) {
-    // Quitar rebote de todos
+    this.selectedPayPad.set(paypad);
+    
     this.markers.forEach((marker) => {
       const el = marker.getElement();
       if (el) el.classList.remove('bounce');
     });
 
-    // Agregar rebote solo al seleccionado
     const marker = this.markersMap.get(paypad.id);
     if (marker) {
       const el = marker.getElement();
       if (el) el.classList.add('bounce');
 
       this.map?.setView([Number(paypad.latitude), Number(paypad.longitude)], 18);
-      marker.fire('click');
+      
+      this.fetchTransactions(paypad.id);
     }
   }
-
-  /**
-   * Restaura tamaño al deseleccionar
-   */
+  
   deselectPaypad() {
     this.selectedPayPad.set(null);
+    this.closeModal(); 
   }
-
 
   private iconForStatus(status?: number): string {
     switch (status) {
       case 1:
-        return 'ActiveMarker-removebg-preview.png'; // Activas
+        return 'ActiveMarker-removebg-preview.png';
       case 0:
-        return 'offMarker-removebg-preview.png'; // Apagadas
+        return 'offMarker-removebg-preview.png';
       case 2:
-        return 'NoConnectionMarker-removebg-preview.png'; // Periférico desconectado
+        return 'NoConnectionMarker-removebg-preview.png';
       case 3:
-        return 'NoInternetMarker-removebg-preview.png'; // Sin Internet
+        return 'NoInternetMarker-removebg-preview.png';
       case 4:
-        return 'NoMoneyMarker-removebg-preview.png'; // Sin dinero
+        return 'NoMoneyMarker-removebg-preview.png';
       default:
-        return 'AllMarker-removebg-preview.png'; // Todas
+        return 'AllMarker-removebg-preview.png';
     }
   }
 
-  /**
-   * Click en marcador: carga transacciones
-   */
+  // 🔥 MODIFICADO: Ahora abre el modal
   private async onMarkerClick(ubicacion: PayPad) {
     if (this.selectedPayPad()?.id !== ubicacion.id) {
       this.selectedPaymentType.set(null);
     }
 
     this.selectedPayPad.set(ubicacion);
+    await this.fetchTransactions(ubicacion.id);
+  }
+
+  // 🔥 NUEVO MÉTODO: Cargar transacciones y abrir modal
+  private async fetchTransactions(paypadId: number) {
     this.loading.set(true);
     this.error.set(null);
     this.transactions.set([]);
+    this.showModal.set(true); // 🔥 ABRIR MODAL
 
-    (await this._api.GetTransactionsById(ubicacion.id)).subscribe({
+    (await this._api.GetTransactionsById(paypadId)).subscribe({
       next: (data: TransactionResponse) => {
         const txs = (data.response ?? []).slice();
         txs.sort((a, b) => new Date(b.dateCreated).getTime() - new Date(a.dateCreated).getTime());
@@ -335,13 +304,16 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     });
   }
 
-  // Helpers
-  private num(v: any): number {
-    const n = Number(v);
-    return isNaN(n) ? n : 0;
+  // 🔥 NUEVO MÉTODO: Cerrar modal
+  closeModal() {
+    this.showModal.set(false);
   }
 
-  // Map id -> marker
+  private num(v: any): number {
+    const n = Number(v);
+    return isNaN(n) ? 0 : n; // 🔥 CORREGIDO: era `n : 0` debería ser `0 : n`
+  }
+
   private markersMap = new Map<number, MarkerWithUrl>();
 
   private mergeSubscriptions(): void {
@@ -365,10 +337,10 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
         : this.paypads.filter((p) => p.status === this.filterState);
   }
 
+  // 🔥 MODIFICADO: Ahora abre el modal
   onSelectIdChange(id: number | '') {
     if (!id) return;
     const p = this.filteredPaypads?.find((pp) => pp.id === id);
     if (p) this.focusOnPaypad(p);
   }
 }
-    
