@@ -73,7 +73,7 @@ export class Api {
     };
     
     return this.http.post<Response>(
-      `${environment.API_URL}/Auth/LoginRealTime`,
+      `${environment.API_URL}/Auth/Login`,
       loginData,
       { headers }
     );

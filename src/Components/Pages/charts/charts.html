@@ -1,193 +1,113 @@
-<link href="../../../output.css" rel="stylesheet"/>
-
-
-<main class="bg-gradient-to-r from-gray-600 to-gray-800 p-3 text-white min-h-screen">
+<main class="bg-gray-800 p-3 text-white min-h-screen">
   <div class="max-w-6xl mx-auto m-3">
-
-    <div class="flex flex-col lg:flex-row gap-4 mb-6">
-      <div class="flex justify-center rounded-lg border border-gray-200 bg-white shadow-md items-center p-6 lg:w-1/3">
-        <img src="e-cityLogo.png" alt="logo1cero1" />
-      </div>
-
-      <div class="bg-white rounded-lg shadow-md p-4 flex-1 text-black">
-        <div class="flex justify-between h-full">
-          <button type="button"
-                  (click)="verCharts()"
-                  class="cursor-pointer flex-1 text-white font-bold bg-gradient-to-r from-gray-600 to-gray-800 rounded-lg flex flex-col items-center justify-center p-4 m-2">
-            <i class="fas fa-hand-holding-usd text-white text-4xl"></i>
-            <p class="mt-2">Ver Gráficas</p>
-          </button>
-
-          <button type="button"
-                  (click)="GoToMaps()"
-                  class="cursor-pointer flex-1 text-white font-bold bg-gradient-to-r from-gray-600 to-gray-800 rounded-lg flex flex-col items-center justify-center p-4 m-2">
-            <i class="fas fa-map-marked-alt text-white text-4xl"></i>
-            <p class="mt-2">Ver Mapa</p>
-          </button>
-
-          <button type="button"
-                  (click)="Exit()"
-                  class="cursor-pointer flex-1 text-white font-bold bg-gradient-to-r from-gray-600 to-gray-800 rounded-lg flex flex-col items-center justify-center p-4 m-2">
-            <i class="fas fa-sign-out-alt text-4xl"></i>
-            <p class="mt-2">Cerrar Sesión</p>
-          </button>
-        </div>
-      </div>
-    </div>
 
     <div class="flex justify-evenly items-center m-5">
       <div class="flex justify-center rounded-lg border border-gray-200 bg-white shadow-md items-center p-2 w-full md:w-1/2 lg:w-1/4">
         <select id="paypads" name="paypads" aria-label="Pay+" 
         [(ngModel)]="selectedPaypadId"
-        (change)="onPaypadChange(selectedPaypadId)" class="font-bold text-center w-full rounded-md bg-gradient-to-r from-gray-600 to-gray-800 text-white py-2 px-3 *:bg-gray-800 *:font-bold placeholder:text-gray-500 focus:outline-2 focus:outline-offset-0 focus:outline-white"
-        >
-          <option value="" [disabled]="selectedPaypadId !== ''">Seleccione un Pay+</option>
+        (change)="onPaypadChange(selectedPaypadId)" 
+        class="font-bold text-center w-full rounded-md bg-gradient-to-r from-gray-600 to-gray-800 text-white py-2 px-3 *:bg-gray-800 *:font-bold placeholder:text-gray-500 focus:outline-2 focus:outline-offset-0 focus:outline-white">
+          <option value="">Seleccione un Pay+</option>
+          <option value="all">Todos los Pay+</option>
           @if(_paypads.length===0){
-              <option value="" disabled selected>¡Error! Recargar Pagina</option>
+              <option value="" disabled>¡Error! Recargar Pagina</option>
           }
           @for (t of _paypads; track t.id) {
-            @if(t.username.includes("Prueba") || t.username.includes("prueba")){
-            }@else { 
+            @if(!t.username.includes("Prueba") && !t.username.includes("prueba")) { 
               <option [value]="t.id">{{ t.username }}</option>
             }
-
-
           }
         </select>
       </div>
       <h2 class="ml-5 text-lg lg:text-4xl font-bold">Filtrar por Pay+</h2>
     </div>
 
-    <section id="charts-section" class="grid md:grid-cols-2 gap-6">
+    @if(showEmptyState) {
+      <div class="text-center py-12">
+        <p class="text-xl text-gray-400"> Selecciona un Pay+ para ver las gráficas</p>
+      </div>
+    }
 
-      <div class="bg-slate-900 rounded-lg p-4 shadow-lg">
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-lg font-bold">Gráfico de Pagos</h2>
-          <div class="flex gap-2">
-            <button (click)="UpdateOptionsPay('1m')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonPay === '1m' ? 'bg-green-500' : 'bg-slate-700'">1M</button>
-            <button (click)="UpdateOptionsPay('6m')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonPay === '6m' ? 'bg-green-500' : 'bg-slate-700'">6M</button>
-            <button (click)="UpdateOptionsPay('1y')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonPay === '1y' ? 'bg-green-500' : 'bg-slate-700'">1Y</button>
-            <button (click)="UpdateOptionsPay('all')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonPay === 'all' ? 'bg-green-500' : 'bg-slate-700'">All</button>
+    @if(!showEmptyState) {
+      <section id="charts-section" class="grid md:grid-cols-2 gap-6">
+
+        <div class="bg-white font-bold text-gray-900 rounded-lg p-4 shadow-lg">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg">Gráfico de Pagos</h2>
+            <div class="flex gap-2">
+              <button (click)="UpdateOptionsPay('1m')" class="px-2 py-1 rounded text-xs"
+                      [ngClass]="_activeOptionButtonPay === '1m' ? 'bg-green-500 text-white' : 'bg-gray-300'">1M</button>
+              <button (click)="UpdateOptionsPay('6m')" class="px-2 py-1 rounded text-xs"
+                      [ngClass]="_activeOptionButtonPay === '6m' ? 'bg-green-500 text-white' : 'bg-gray-300'">6M</button>
+              <button (click)="UpdateOptionsPay('1y')" class="px-2 py-1 rounded text-xs"
+                      [ngClass]="_activeOptionButtonPay === '1y' ? 'bg-green-500 text-white' : 'bg-gray-300'">1Y</button>
+              <button (click)="UpdateOptionsPay('all')" class="px-2 py-1 rounded text-xs"
+                      [ngClass]="_activeOptionButtonPay === 'all' ? 'bg-green-500 text-white' : 'bg-gray-300'">All</button>
+            </div>
+          </div>
+          <div class="relative h-64">
+            <canvas #payChart></canvas>
           </div>
         </div>
 
-        <apx-chart
-          #_chart
-          [series]="_chartOptionsPay.series"
-          [chart]="_chartOptionsPay.chart"
-          [xaxis]="_chartOptionsPay.xaxis"
-          [annotations]="_chartOptionsPay.annotations!"
-          [dataLabels]="_chartOptionsPay.dataLabels"
-          [markers]="_chartOptionsPay.markers"
-          [stroke]="_chartOptionsPay.stroke"
-          [grid]="_chartOptionsPay.grid"
-          [tooltip]="_chartOptionsPay.tooltip"
-          [fill]="_chartOptionsPay.fill"
-          [theme]="_chartOptionsPay.theme"
-          [yaxis]="_chartOptionsPay.yaxis!"
-        ></apx-chart>
-      </div>
-
-      <div class="bg-slate-900 rounded-lg p-4 shadow-lg">
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-lg font-bold">Gráfico de Retiros</h2>
-          <div class="flex gap-2">
-            <button (click)="UpdateOptionsWithdraw('1m')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonWithdraw === '1m' ? 'bg-red-600' : 'bg-slate-700'">1M</button>
-            <button (click)="UpdateOptionsWithdraw('6m')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonWithdraw === '6m' ? 'bg-red-600' : 'bg-slate-700'">6M</button>
-            <button (click)="UpdateOptionsWithdraw('1y')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonWithdraw === '1y' ? 'bg-red-600' : 'bg-slate-700'">1Y</button>
-            <button (click)="UpdateOptionsWithdraw('all')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonWithdraw === 'all' ? 'bg-red-600' : 'bg-slate-700'">All</button>
+        <div class="bg-white font-bold text-gray-900 rounded-lg p-4 shadow-lg">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-bold">Gráfico de Retiros</h2>
+            <div class="flex gap-2">
+              <button (click)="UpdateOptionsWithdraw('1m')" class="px-2 py-1 rounded text-xs"
+                      [ngClass]="_activeOptionButtonWithdraw === '1m' ? 'bg-red-600 text-white' : 'bg-gray-300'">1M</button>
+              <button (click)="UpdateOptionsWithdraw('6m')" class="px-2 py-1 rounded text-xs"
+                      [ngClass]="_activeOptionButtonWithdraw === '6m' ? 'bg-red-600 text-white' : 'bg-gray-300'">6M</button>
+              <button (click)="UpdateOptionsWithdraw('1y')" class="px-2 py-1 rounded text-xs"
+                      [ngClass]="_activeOptionButtonWithdraw === '1y' ? 'bg-red-600 text-white' : 'bg-gray-300'">1Y</button>
+              <button (click)="UpdateOptionsWithdraw('all')" class="px-2 py-1 rounded text-xs"
+                      [ngClass]="_activeOptionButtonWithdraw === 'all' ? 'bg-red-600 text-white' : 'bg-gray-300'">All</button>
+            </div>
+          </div>
+          <div class="relative h-64">
+            <canvas #withdrawChart></canvas>
           </div>
         </div>
 
-        <apx-chart
-          #_chartWithdraw
-          [series]="_chartOptionsWithdraw.series"
-          [chart]="_chartOptionsWithdraw.chart"
-          [xaxis]="_chartOptionsWithdraw.xaxis"
-          [annotations]="_chartOptionsWithdraw.annotations!"
-          [dataLabels]="_chartOptionsWithdraw.dataLabels"
-          [markers]="_chartOptionsWithdraw.markers"
-          [stroke]="_chartOptionsWithdraw.stroke"
-          [grid]="_chartOptionsWithdraw.grid"
-          [tooltip]="_chartOptionsWithdraw.tooltip"
-          [fill]="_chartOptionsWithdraw.fill"
-          [yaxis]="_chartOptionsWithdraw.yaxis!"
-          [theme]="_chartOptionsPay.theme"
-        ></apx-chart>
-      </div>
-      <div class="bg-slate-900 rounded-lg p-4 shadow-lg">
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-lg font-bold">Gráfico de Transacciones</h2>
-          <div class="flex gap-2">
-            <button (click)="UpdateOptionsTransaction('1m')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonTransaction === '1m' ? 'bg-blue-600' : 'bg-slate-700'">1M</button>
-            <button (click)="UpdateOptionsTransaction('6m')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonTransaction === '6m' ? 'bg-blue-600' : 'bg-slate-700'">6M</button>
-            <button (click)="UpdateOptionsTransaction('1y')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonTransaction === '1y' ? 'bg-blue-600' : 'bg-slate-700'">1Y</button>
-            <button (click)="UpdateOptionsTransaction('all')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_activeOptionButtonTransaction === 'all' ? 'bg-blue-600' : 'bg-slate-700'">All</button>
+        <div class="bg-white font-bold text-gray-900 rounded-lg p-4 shadow-lg">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-bold">Gráfico de Transacciones</h2>
+            <div class="flex gap-2">
+              <button (click)="UpdateOptionsTransaction('1m')" class="px-2 py-1 rounded text-xs"
+                      [ngClass]="_activeOptionButtonTransaction === '1m' ? 'bg-purple-600 text-white' : 'bg-gray-300'">1M</button>
+              <button (click)="UpdateOptionsTransaction('6m')" class="px-2 py-1 rounded text-xs"
+                      [ngClass]="_activeOptionButtonTransaction === '6m' ? 'bg-purple-600 text-white' : 'bg-gray-300'">6M</button>
+              <button (click)="UpdateOptionsTransaction('1y')" class="px-2 py-1 rounded text-xs"
+                      [ngClass]="_activeOptionButtonTransaction === '1y' ? 'bg-purple-600 text-white' : 'bg-gray-300'">1Y</button>
+              <button (click)="UpdateOptionsTransaction('all')" class="px-2 py-1 rounded text-xs"
+                      [ngClass]="_activeOptionButtonTransaction === 'all' ? 'bg-purple-600 text-white' : 'bg-gray-300'">All</button>
+            </div>
+          </div>
+          <div class="relative h-64">
+            <canvas #transactionChart></canvas>
           </div>
         </div>
 
-        <apx-chart
-          #_chartTransaction
-          [series]="_chartOptionsTransaction.series"
-          [chart]="_chartOptionsTransaction.chart"
-          [xaxis]="_chartOptionsTransaction.xaxis"
-          [annotations]="_chartOptionsTransaction.annotations!"
-          [dataLabels]="_chartOptionsTransaction.dataLabels"
-          [markers]="_chartOptionsTransaction.markers"
-          [stroke]="_chartOptionsTransaction.stroke"
-          [grid]="_chartOptionsTransaction.grid"
-          [tooltip]="_chartOptionsTransaction.tooltip"
-          [fill]="_chartOptionsTransaction.fill"
-          [yaxis]="_chartOptionsTransaction.yaxis!"
-          [theme]="_chartOptionsPay.theme"
-        ></apx-chart>
-      </div>
-      <div class="bg-slate-900 rounded-lg p-4 shadow-lg">
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-lg font-bold">Comparativa Pagos vs Retiros</h2>
-          <div class="flex gap-2">
-            <button (click)="UpdateOptionsComparison('1m')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_comparisonRange === '1m' ? 'bg-blue-600' : 'bg-slate-700'">1M</button>
-            <button (click)="UpdateOptionsComparison('6m')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_comparisonRange === '6m' ? 'bg-blue-600' : 'bg-slate-700'">6M</button>
-            <button (click)="UpdateOptionsComparison('1y')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_comparisonRange === '1y' ? 'bg-blue-600' : 'bg-slate-700'">1Y</button>
-            <button (click)="UpdateOptionsComparison('all')" class="px-2 py-1 rounded text-xs"
-                    [ngClass]="_comparisonRange === 'all' ? 'bg-blue-600' : 'bg-slate-700'">All</button>
+        <div class="bg-white font-bold text-gray-900 rounded-lg p-4 shadow-lg">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-bold">Comparativa Pagos vs Retiros</h2>
+            <div class="flex gap-2">
+              <button (click)="UpdateOptionsComparison('1m')" class="px-2 py-1 rounded text-xs"
+                      [ngClass]="_comparisonRange === '1m' ? 'bg-blue-600 text-white' : 'bg-gray-300'">1M</button>
+              <button (click)="UpdateOptionsComparison('6m')" class="px-2 py-1 rounded text-xs"
+                      [ngClass]="_comparisonRange === '6m' ? 'bg-blue-600 text-white' : 'bg-gray-300'">6M</button>
+              <button (click)="UpdateOptionsComparison('1y')" class="px-2 py-1 rounded text-xs"
+                      [ngClass]="_comparisonRange === '1y' ? 'bg-blue-600 text-white' : 'bg-gray-300'">1Y</button>
+              <button (click)="UpdateOptionsComparison('all')" class="px-2 py-1 rounded text-xs"
+                      [ngClass]="_comparisonRange === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-300'">All</button>
+            </div>
+          </div>
+          <div class="relative h-64">
+            <canvas #donutChart></canvas>
           </div>
         </div>
 
-        <apx-chart
-          #_donutCompare
-          [series]="_donutCompareSeries"
-          [chart]="_donutCompareOptions.chart!"
-          [labels]="_donutCompareOptions.labels!"
-          [colors]="_donutCompareOptions.colors!"
-          [plotOptions]="_donutCompareOptions.plotOptions!"
-          [dataLabels]="_donutCompareOptions.dataLabels!"
-          [theme]="_donutCompareOptions.theme!"
-          [legend]="_donutCompareOptions.legend!"
-          [tooltip]="_donutCompareOptions.tooltip!"
-        ></apx-chart>
-      </div>
-    </section>
+      </section>
+    }
   </div>
 </main>
-<footer style="height: 10vh;" class="w-full bg-black flex justify-center">
-  <p class="mt-6 text-xs leading-5 text-gray-100 text-center">
-    © {{ _currentYear }} - E-city software - Creado por
-    <a href="https://www.1cero1.com/" class="font-medium text-white underline">1cero1 Software</a>
-  </p>
-</footer>

@@ -33,7 +33,6 @@ export class Login {
   // Variables para la vista
   _currentYear: number = new Date().getFullYear();
   constructor() {
-    localStorage.clear()
     // Escuchar cambios en el estado y valor del email para mostrar errores
     merge(this.user.statusChanges, this.user.valueChanges)
       .pipe(takeUntilDestroyed())

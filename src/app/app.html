@@ -1,1 +1,108 @@
-<router-outlet />
+<div class="relative flex h-dvh w-full bg-gray-50 overflow-hidden">
+  @if (router.url !== '/login') {
+    <aside class="flex-shrink-0 w-64 bg-white border-r border-gray-200 flex flex-col justify-between">
+      
+      <div class="p-6 border-b- border-b-3 border-gray-200">
+        <a href="https://www.e-city.co/" target="_blank">
+          <img src="e-cityLogo.png" alt="logo E-city" class="w-full">
+        </a>
+      </div>
+
+      <nav class="flex-1 p-4">
+        <div class="flex flex-col gap-2">
+          <button 
+            type="button" 
+            class="cursor-pointer flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 group transition-colors"
+            [routerLink]="['/dashboard']"
+            routerLinkActive="bg-blue-50"
+            [routerLinkActiveOptions]="{ exact: true }">
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              viewBox="0 0 24 24"
+              class="w-5 h-5 text-gray-500 group-hover:text-blue-600"
+              fill="currentColor"
+              routerLinkActive="!text-blue-600">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+            <span 
+              class="text-sm font-medium text-gray-700 group-hover:text-blue-600"
+              routerLinkActive="!text-blue-600">
+              Dashboard
+            </span>
+          </button>
+
+          <button 
+            type="button" 
+            class="cursor-pointer flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 group transition-colors"
+            [routerLink]="['/charts']"
+            routerLinkActive="bg-blue-50"
+            [routerLinkActiveOptions]="{ exact: true }">
+            <svg 
+              class="w-5 h-5 text-gray-500 group-hover:text-blue-600" 
+              aria-hidden="true" 
+              xmlns="http://www.w3.org/2000/svg" 
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              routerLinkActive="!text-blue-600">
+              <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+            </svg>
+            <span 
+              class="cursor-pointer text-sm font-medium text-gray-700 group-hover:text-blue-600"
+              routerLinkActive="!text-blue-600">
+              Charts
+            </span>
+          </button>
+
+          
+
+          <button 
+            type="button" 
+            class="cursor-pointer flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 group transition-colors"
+            [routerLink]="['/calendar']"
+            routerLinkActive="bg-blue-50"
+            [routerLinkActiveOptions]="{ exact: true }">
+            <svg 
+              class="w-5 h-5 mb-1 text-gray-500 group-hover:text-blue-600" 
+              aria-hidden="true" 
+              xmlns="http://www.w3.org/2000/svg" 
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              routerLinkActive="!text-blue-600">
+              <path d="M11.074 4 8.442.408A.95.95 0 0 0 7.014.254L2.926 4h8.148ZM9 13v-1a4 4 0 0 1 4-4h6V6a1 1 0 0 0-1-1H1a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h17a1 1 0 0 0 1-1v-2h-6a4 4 0 0 1-4-4Z"/>
+              <path d="M19 10h-6a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h6a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1Zm-4.5 3.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2ZM12.62 4h2.78L12.539.41a1.086 1.086 0 1 0-1.7 1.352L12.62 4Z"/>
+            </svg>
+            <span 
+              class="text-sm font-medium text-gray-700 group-hover:text-blue-600"
+              routerLinkActive="!text-blue-600">
+              Transacciones
+            </span>
+          </button>
+
+        </div>
+      </nav>
+
+      <div class="p-4 border-t border-gray-200">
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 rounded-full bg-gray-800 border-2 border-blue-400 flex-shrink-0"></div>
+          <div class="flex flex-col">
+            <div class="text-sm font-medium text-gray-900">Admin</div>
+            <a 
+              [routerLink]="['/login']" 
+              class="text-xs text-gray-600 hover:text-blue-600 hover:underline">
+              Cerrar sesión
+            </a>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto">
+      <router-outlet />
+    </main>
+
+  } @else {
+    <div class="w-full min-h-dvh flex items-center justify-center p-4">
+      <router-outlet />
+    </div>
+  }
+</div>
