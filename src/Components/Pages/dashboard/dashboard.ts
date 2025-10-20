@@ -165,6 +165,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
   }
 
   public setState(state: number) {
+    this.deselectPaypad();
     this.filterState = state;
     this.applyFilter();
     this.redrawMarkers();
@@ -239,7 +240,6 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
       marker.customIconUrl = iconUrl;
       marker.paypadId = ubicacion.id;
 
-      // Click en marker del mapa: ABRE LA MODAL
       marker.on('click', () => this.zone.run(() => this.onMarkerClick(ubicacion)));
 
       marker.addTo(this.map);
@@ -248,42 +248,34 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     }
   }
 
-  // NUEVO: Solo enfoca y resalta, SIN abrir modal
   focusOnPaypad(paypad: PayPad) {
     this.selectedPayPad.set(paypad);
     
-    // Resetear todos los markers a tamaño normal
     this.resetAllMarkersSize();
 
-    // Obtener el marker seleccionado
     const marker = this.markersMap.get(paypad.id);
     if (marker) {
-      // Agrandar el marker seleccionado
       this.enlargeMarker(marker);
       
-      // Guardar el ID del marker enfocado
       this.currentFocusedMarkerId = paypad.id;
 
-      // Animación suave del mapa (tipo Starbucks)
       this.map?.flyTo(
         [Number(paypad.longitude), Number(paypad.latitude)], 
         16, // zoom level
         {
           animate: true,
-          duration: 0.8, // duración en segundos
+          duration: 0.8, 
           easeLinearity: 0.1,
         }
       );
     }
   }
 
-  // Resetear el enfoque sin abrir modal
   deselectPaypad() {
     this.selectedPayPad.set(null);
     this.resetAllMarkersSize();
     this.currentFocusedMarkerId = null;
     
-    // Volver a la vista general de Colombia
     this.map?.flyTo([4.59806, -74.0758], 5, {
       animate: true,
       duration: 1.5,
@@ -308,7 +300,6 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     }
   }
 
-  // Click en marker: ABRE LA MODAL
   private async onMarkerClick(ubicacion: PayPad) {
     if (this.selectedPayPad()?.id !== ubicacion.id) {
       this.selectedPaymentType.set(null);
