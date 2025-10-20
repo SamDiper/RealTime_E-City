@@ -17,43 +17,35 @@ import { Response } from '../../../Interfaces/response';
 })
 export class Login {
 
- // Form controls para manejar el estado del formulario
   readonly user = new FormControl('', [Validators.required]);
   readonly password = new FormControl('', [Validators.required]);
 
-  // Señales (signals) para la lógica de la UI
   showPassword = signal(false);
   errorMessage = signal('');
   loading = signal(false);
   
-  // Servicios inyectados
   private readonly _apiComponent = inject(Api);
   private readonly router = inject(Router);
 
-  // Variables para la vista
   _currentYear: number = new Date().getFullYear();
   constructor() {
-    // Escuchar cambios en el estado y valor del email para mostrar errores
     merge(this.user.statusChanges, this.user.valueChanges)
       .pipe(takeUntilDestroyed())
       .subscribe(() => this.updateEmailErrorMessage());
   }
 
-  // Método para manejar el evento de clic en el ícono de visibilidad
   togglePasswordVisibility(event: MouseEvent) {
     this.showPassword.set(!this.showPassword());
     event.stopPropagation();
   }
 
-  // Manejador del envío del formulario
   onSubmit(): void {
-    // Verifica que ambos campos sean válidos
     if (this.user.valid && this.password.valid) {
       this.loading.set(true);
            console.log('OnSubmit');
 
       const loginData: LoginDto = {
-        userName: this.user.value!.trim(), // Usar `email.value!` para acceder al valor no-nulo
+        userName: this.user.value!.trim(),
         pwd: this.password.value!
       };
      console.log('Login data:', loginData);
@@ -91,14 +83,13 @@ export class Login {
         }
       });
     } else {
-      // Si el formulario es inválido, muestra los mensajes de error
+
       this.updateEmailErrorMessage();
       this.updatePasswordErrorMessage();
     
   } 
 }
 
-  // Actualiza el mensaje de error del email
   updateEmailErrorMessage() {
     if (this.user.hasError('required')) {
       this.errorMessage.set('El usuario es requerido');
@@ -109,7 +100,6 @@ export class Login {
     }
   }
 
-  // Actualiza el mensaje de error de la contraseña
   updatePasswordErrorMessage() {
     if (this.password.hasError('required')) {
       this.errorMessage.set('La contraseña es requerida');
