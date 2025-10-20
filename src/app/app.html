@@ -1,17 +1,55 @@
 <div class="relative flex h-dvh w-full bg-gray-50 overflow-hidden">
   @if (router.url !== '/login') {
-    <aside class="flex-shrink-0 w-64 bg-white border-r border-gray-200 flex flex-col justify-between">
+    
+    <button
+      (click)="toggleSidebar()"
+      class="fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-lg lg:hidden hover:bg-gray-50 transition-colors"
+      aria-label="Toggle menu">
+      <svg 
+        class="w-6 h-6 text-gray-700" 
+        fill="none" 
+        stroke="currentColor" 
+        viewBox="0 0 24 24">
+        @if (!sidebarOpen()) {
+          <path 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            stroke-width="2" 
+            d="M4 6h16M4 12h16M4 18h16"/>
+        } @else {
+          <path 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            stroke-width="2" 
+            d="M6 18L18 6M6 6l12 12"/>
+        }
+      </svg>
+    </button>
+
+    @if (sidebarOpen()) {
+      <div 
+        (click)="closeSidebar()"
+        class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden transition-opacity duration-300"
+        [@fadeIn]>
+      </div>
+    }
+
+    <aside 
+      [class]="sidebarClasses()"
+      class="flex-shrink-0 w-64 bg-white border-r border-gray-200 flex flex-col justify-between transition-transform duration-300 ease-in-out z-40">
       
-      <div class="p-6 border-b- border-b-3 border-gray-200">
+      <div class="p-6 border-b border-gray-200">
         <a href="https://www.e-city.co/" target="_blank">
           <img src="e-cityLogo.png" alt="logo E-city" class="w-full">
         </a>
       </div>
 
-      <nav class="flex-1 p-4">
+      <nav class="flex-1 p-4 overflow-y-auto">
         <div class="flex flex-col gap-2">
+          
           <button 
             type="button" 
+            (click)="navigateAndClose('/dashboard')"
             class="cursor-pointer flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 group transition-colors"
             [routerLink]="['/dashboard']"
             routerLinkActive="bg-blue-50"
@@ -33,6 +71,7 @@
 
           <button 
             type="button" 
+            (click)="navigateAndClose('/charts')"
             class="cursor-pointer flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 group transition-colors"
             [routerLink]="['/charts']"
             routerLinkActive="bg-blue-50"
@@ -47,22 +86,21 @@
               <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
             </svg>
             <span 
-              class="cursor-pointer text-sm font-medium text-gray-700 group-hover:text-blue-600"
+              class="text-sm font-medium text-gray-700 group-hover:text-blue-600"
               routerLinkActive="!text-blue-600">
               Charts
             </span>
           </button>
 
-          
-
           <button 
             type="button" 
+            (click)="navigateAndClose('/calendar')"
             class="cursor-pointer flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 group transition-colors"
             [routerLink]="['/calendar']"
             routerLinkActive="bg-blue-50"
             [routerLinkActiveOptions]="{ exact: true }">
             <svg 
-              class="w-5 h-5 mb-1 text-gray-500 group-hover:text-blue-600" 
+              class="w-5 h-5 text-gray-500 group-hover:text-blue-600" 
               aria-hidden="true" 
               xmlns="http://www.w3.org/2000/svg" 
               fill="currentColor"
@@ -88,6 +126,7 @@
             <div class="text-sm font-medium text-gray-900">Admin</div>
             <a 
               [routerLink]="['/login']" 
+              (click)="closeSidebar()"
               class="text-xs text-gray-600 hover:text-blue-600 hover:underline">
               Cerrar sesión
             </a>
