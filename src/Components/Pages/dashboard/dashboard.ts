@@ -9,20 +9,25 @@ import {
   NgZone,
   signal,
   computed,
-  HostListener, // 👈 AGREGAR
 } from '@angular/core';
 import * as L from 'leaflet';
 import { FormsModule } from '@angular/forms';
-import { CommonModule, DatePipe, CurrencyPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 
 import { Api } from '../../../Services/apiService';
-import { PayPadResponse, PayPad } from '../../../Interfaces/locations';
+import {
+  PayPadResponse,
+  PayPad,
+  SubscriptionResponse,
+  PaypadAlert,
+} from '../../../Interfaces/locations';
 import { Transaction, TransactionResponse } from '../../../Interfaces/transactions';
 
 type PaymentOption = { label: string; value: string | null };
-type MarkerWithUrl = L.Marker & { customIconUrl: string };
+type MarkerWithUrl = L.Marker & { customIconUrl: string; paypadId: number };
 
 @Component({
   selector: 'app-dashboard',
@@ -43,11 +48,12 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
   _currentYear: number = new Date().getFullYear();
 
   private defaultIconSize: [number, number] = [30, 30];
-  private bigIconSize: [number, number] = [60, 60];
+  private bigIconSize: [number, number] = [50, 50];
+  private currentFocusedMarkerId: number | null = null;
 
   paypads: PayPad[] = [];
+  subscriptions: PaypadAlert[] = [];
   filteredPaypads: PayPad[] = [];
-  subscriptions: any;
 
   private filterState = -1;
 
@@ -55,7 +61,6 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
   loading = signal(false);
   error = signal<string | null>(null);
 
-  // 🔥 NUEVA PROPIEDAD PARA EL MODAL
   showModal = signal(false);
 
   transactions = signal<Transaction[]>([]);
@@ -84,10 +89,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     const list = type ? txs.filter((t) => t.typePayment === type) : txs;
 
     for (const el of list) {
-      if (
-        el.stateTransaction === 'Cancelada' ||
-        el.stateTransaction === 'Cancelada Error Devuelta'
-      ) {
+      if (el.stateTransaction === 'Cancelada' || el.stateTransaction === 'Cancelada Error Devuelta') {
         this.cantCancelada++;
       }
       if (
@@ -179,22 +181,35 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
       zoom: 5,
       maxBounds: colombiaBounds,
       maxBoundsViscosity: 0.7,
+      zoomAnimation: true,
+      fadeAnimation: true,
+      markerZoomAnimation: true,
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(this.map);
   }
 
   private async cargarUbicaciones(): Promise<void> {
-    (await this._api.GetAllPaypads()).subscribe({
-      next: (data: PayPadResponse) => {
-        this.paypads = data.response ?? [];
-        this.applyFilter();
-        this.redrawMarkers();
-      },
-      error: (err) => {
-        console.error('Error al cargar ubicaciones:', err);
-      },
-    });
+    try {
+      const paypads$ = await this._api.GetAllPaypads();
+      const subs$ = await this._api.GetAllSubscriptions();
+
+      forkJoin([paypads$, subs$]).subscribe({
+        next: ([paypadsRes, subsRes]: [PayPadResponse, SubscriptionResponse]) => {
+          this.paypads = paypadsRes.response ?? [];
+          this.subscriptions = subsRes.response ?? [];
+
+          this.mergeSubscriptions();
+          this.applyFilter();
+          this.redrawMarkers();
+        },
+        error: (err) => {
+          console.error('Error al cargar paypads o subscriptions:', err);
+        },
+      });
+    } catch (err) {
+      console.error('Error en cargarUbicaciones (await):', err);
+    }
   }
 
   private redrawMarkers(): void {
@@ -213,8 +228,8 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
 
       const marker = L.marker([lng, lat], {
         icon: L.divIcon({
-          className: `marker-wrapper ${ubicacion.status !== 1 ? 'bounce' : ''}`,
-          html: `<img src="${iconUrl}" alt="paypad" style="width:30px;height:30px;" />`,
+          className: `marker-wrapper transition-all duration-300 ${ubicacion.status !== 1 ? 'bounce' : ''}`,
+          html: `<img src="${iconUrl}" alt="paypad" class="marker-icon transition-all duration-300" style="width:30px;height:30px;" />`,
           iconSize: this.defaultIconSize,
           iconAnchor: [15, 30],
         }),
@@ -222,7 +237,9 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
       }) as MarkerWithUrl;
 
       marker.customIconUrl = iconUrl;
+      marker.paypadId = ubicacion.id;
 
+      // Click en marker del mapa: ABRE LA MODAL
       marker.on('click', () => this.zone.run(() => this.onMarkerClick(ubicacion)));
 
       marker.addTo(this.map);
@@ -231,28 +248,47 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     }
   }
 
+  // NUEVO: Solo enfoca y resalta, SIN abrir modal
   focusOnPaypad(paypad: PayPad) {
     this.selectedPayPad.set(paypad);
     
-    this.markers.forEach((marker) => {
-      const el = marker.getElement();
-      if (el) el.classList.remove('bounce');
-    });
+    // Resetear todos los markers a tamaño normal
+    this.resetAllMarkersSize();
 
+    // Obtener el marker seleccionado
     const marker = this.markersMap.get(paypad.id);
     if (marker) {
-      const el = marker.getElement();
-      if (el) el.classList.add('bounce');
-
-      this.map?.setView([Number(paypad.latitude), Number(paypad.longitude)], 18);
+      // Agrandar el marker seleccionado
+      this.enlargeMarker(marker);
       
-      this.fetchTransactions(paypad.id);
+      // Guardar el ID del marker enfocado
+      this.currentFocusedMarkerId = paypad.id;
+
+      // Animación suave del mapa (tipo Starbucks)
+      this.map?.flyTo(
+        [Number(paypad.longitude), Number(paypad.latitude)], 
+        16, // zoom level
+        {
+          animate: true,
+          duration: 0.8, // duración en segundos
+          easeLinearity: 0.1,
+        }
+      );
     }
   }
-  
+
+  // Resetear el enfoque sin abrir modal
   deselectPaypad() {
     this.selectedPayPad.set(null);
-    this.closeModal(); 
+    this.resetAllMarkersSize();
+    this.currentFocusedMarkerId = null;
+    
+    // Volver a la vista general de Colombia
+    this.map?.flyTo([4.59806, -74.0758], 5, {
+      animate: true,
+      duration: 1.5,
+      easeLinearity: 0.25,
+    });
   }
 
   private iconForStatus(status?: number): string {
@@ -272,22 +308,29 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     }
   }
 
-  // 🔥 MODIFICADO: Ahora abre el modal
+  // Click en marker: ABRE LA MODAL
   private async onMarkerClick(ubicacion: PayPad) {
     if (this.selectedPayPad()?.id !== ubicacion.id) {
       this.selectedPaymentType.set(null);
     }
 
     this.selectedPayPad.set(ubicacion);
+    
+    this.resetAllMarkersSize();
+    const marker = this.markersMap.get(ubicacion.id);
+    if (marker) {
+      this.enlargeMarker(marker);
+      this.currentFocusedMarkerId = ubicacion.id;
+    }
+
     await this.fetchTransactions(ubicacion.id);
   }
 
-  // 🔥 NUEVO MÉTODO: Cargar transacciones y abrir modal
   private async fetchTransactions(paypadId: number) {
     this.loading.set(true);
     this.error.set(null);
     this.transactions.set([]);
-    this.showModal.set(true); // 🔥 ABRIR MODAL
+    this.showModal.set(true);
 
     (await this._api.GetTransactionsById(paypadId)).subscribe({
       next: (data: TransactionResponse) => {
@@ -304,29 +347,63 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     });
   }
 
-  // 🔥 NUEVO MÉTODO: Cerrar modal
   closeModal() {
     this.showModal.set(false);
   }
 
+  private enlargeMarker(marker: MarkerWithUrl) {
+    const icon = marker.getIcon() as L.DivIcon;
+    const newIcon = L.divIcon({
+      className: icon.options.className,
+      html: `<img src="${marker.customIconUrl}" alt="paypad" class="marker-icon transition-all duration-300" style="width:${this.bigIconSize[0]}px;height:${this.bigIconSize[1]}px;" />`,
+      iconSize: this.bigIconSize,
+      iconAnchor: [this.bigIconSize[0] / 2, this.bigIconSize[1]],
+    });
+    marker.setIcon(newIcon);
+  }
+
+  private resetAllMarkersSize() {
+    this.markers.forEach((marker) => {
+      const icon = marker.getIcon() as L.DivIcon;
+      const newIcon = L.divIcon({
+        className: icon.options.className,
+        html: `<img src="${marker.customIconUrl}" alt="paypad" class="marker-icon transition-all duration-300" style="width:${this.defaultIconSize[0]}px;height:${this.defaultIconSize[1]}px;" />`,
+        iconSize: this.defaultIconSize,
+        iconAnchor: [this.defaultIconSize[0] / 2, this.defaultIconSize[1]],
+      });
+      marker.setIcon(newIcon);
+    });
+  }
+
   private num(v: any): number {
     const n = Number(v);
-    return isNaN(n) ? 0 : n; // 🔥 CORREGIDO: era `n : 0` debería ser `0 : n`
+    return isNaN(n) ? 0 : n;
   }
 
   private markersMap = new Map<number, MarkerWithUrl>();
 
-  private mergeSubscriptions(): void {
-    if (!this.subscriptions || !this.paypads.length) return;
+  private mapAlertToStatus(idAlert: number): number {
+    if (idAlert === 1) return 4;
+    return idAlert;
+  }
 
+  private mergeSubscriptions(): void {
+    if (!this.subscriptions || !this.subscriptions.length || !this.paypads.length) return;
+
+    const alertsByPaypad = new Map<number, PaypadAlert[]>();
     for (const s of this.subscriptions) {
-      const p = this.paypads.find((pp) => pp.id === s.idPayPad);
-      if (p) {
-        if (s.idAlert == 1) {
-          s.idAlert = 4;
-        }
-        p.status = s.idAlert;
-      }
+      if (!s.idPayPad) continue;
+      const arr = alertsByPaypad.get(s.idPayPad) ?? [];
+      arr.push(s);
+      alertsByPaypad.set(s.idPayPad, arr);
+    }
+
+    for (const p of this.paypads) {
+      const alerts = alertsByPaypad.get(p.id);
+      if (!alerts || !alerts.length) continue;
+
+      const chosenAlert = alerts[alerts.length - 1];
+      p.status = this.mapAlertToStatus(chosenAlert.idAlert);
     }
   }
 
@@ -337,7 +414,6 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
         : this.paypads.filter((p) => p.status === this.filterState);
   }
 
-  // 🔥 MODIFICADO: Ahora abre el modal
   onSelectIdChange(id: number | '') {
     if (!id) return;
     const p = this.filteredPaypads?.find((pp) => pp.id === id);

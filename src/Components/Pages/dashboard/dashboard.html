@@ -25,16 +25,14 @@
     will-change: transform;
   }
 
-  .paypads-list-container {
-    height: calc(500px - 57px);
-    overflow-y: auto;
-    overflow-x: hidden;
+  .marker-icon {
+    transition: all 0.3s ease;
   }
 
-  @media (max-width: 640px) {
-    .paypads-list-container {
-      height: calc(500px - 60px - 57px);
-    }
+  .paypads-list-container {
+    height: calc(100% - 57px);
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .paypads-list-container {
@@ -43,7 +41,7 @@
   }
 
   .paypads-list-container::-webkit-scrollbar {
-    width: 10px;
+    width: 8px;
   }
 
   .paypads-list-container::-webkit-scrollbar-track {
@@ -52,7 +50,7 @@
 
   .paypads-list-container::-webkit-scrollbar-thumb {
     background-color: rgba(156, 163, 175, 0.6);
-    border-radius: 5px;
+    border-radius: 4px;
     border: 2px solid rgba(243, 244, 246, 0.5);
   }
 
@@ -60,7 +58,6 @@
     background-color: rgba(107, 114, 128, 0.8);
   }
 
-  /* MODAL STYLES */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -104,7 +101,7 @@
 
   .modal-body {
     overflow-y: auto;
-    max-height: calc(90vh - 120px);
+    max-height: calc(90vh - 80px);
   }
 
   .modal-body::-webkit-scrollbar {
@@ -119,58 +116,108 @@
     background-color: #9ca3af;
     border-radius: 4px;
   }
+
+  .map-container {
+    height: 400px;
+  }
+
+  @media (min-width: 640px) {
+    .map-container {
+      height: 500px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .map-container {
+      height: 600px;
+    }
+  }
 </style>
 
-<div class="bg-gradient-to-r from-gray-600 to-gray-800 pb-4 ">
-  <h1 class="font-bold text-white text-md lg:text-4xl p-5">Información PayPads</h1>
-  <div class="px-4 pb-4">
-    <div class="flex flex-col sm:flex-row rounded-lg shadow-xl bg-white overflow-hidden" style="height: 500px;">
+<div class="bg-gray-800 p-1 pt-10 min-h-screen lg:min-h-0">
+  
+      <div class="text-center mb-8 lg:mb-12">
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white mb-3 tracking-tight">
+            Centro de Información
+        </h1>
+        <p class="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto">
+          Visualiza el estado de los Pay+ en tiempo real
+        </p>
+      </div>
+
+  <div class="px-4 pb-4 lg:px-6">
+    <div class="flex flex-col lg:flex-row rounded-lg shadow-xl bg-white overflow-hidden map-container">
       
-      <div class="block sm:hidden border-b border-gray-200 p-3 bg-white" style="height: 60px;">
-        <label class="block text-sm font-medium text-gray-700 mb-1">Selecciona un punto</label>
+      <div class="lg:hidden border-b border-gray-200 p-3 bg-white">
+        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+          Selecciona un punto
+        </label>
         <select
-          class="w-full rounded-md border border-gray-300 focus:border-gray-500 focus:ring-1 focus:ring-gray-500 text-sm px-3 py-2"
+          class="w-full rounded-md border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-sm px-3 py-2.5 transition-all"
           [ngModel]="selectedPayPad()?.id ?? ''"
           (ngModelChange)="onSelectIdChange($event)">
-          <option [ngValue]="''" disabled>— Selecciona —</option>
+          <option [ngValue]="''" disabled>— Selecciona un PayPad —</option>
           @for (p of filteredPaypads; track p.id) {
-            <option [ngValue]="p.id">{{ p.username }}</option>
+            <option [ngValue]="p.id">{{ p.username }} (ID: {{ p.id }})</option>
           }
         </select>
       </div>
 
-      <aside class="hidden sm:block border-r border-gray-300 bg-white" style="width: 280px; height: 500px;">
+      <aside class="hidden lg:flex flex-col border-r border-gray-300 bg-white w-80 flex-shrink-0">
         
-        <div class="p-4 border-b border-gray-200 bg-white" style="height: 57px;">
-          <h2 class="font-bold text-base text-gray-700">
-            Puntos 
-            <span class="text-sm font-normal text-gray-500">({{ filteredPaypads.length }})</span>
+        <div class="p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white flex-shrink-0">
+          <h2 class="font-bold text-base text-gray-800 flex items-center justify-between">
+            <span>Puntos Activos</span>
+            <span class="text-sm font-semibold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+              {{ filteredPaypads.length }}
+            </span>
           </h2>
         </div>
         
         <div class="paypads-list-container bg-white">
           @if (filteredPaypads.length === 0) {
-            <div class="p-4 text-center text-gray-500 text-sm">
-              No hay puntos disponibles
+            <div class="p-8 text-center">
+              <p class="text-gray-500 text-sm">¡Problemas con los servicios! No hay puntos disponibles</p>
             </div>
           } @else {
-            <ul class="divide-y divide-gray-200">
+            <ul class="divide-y divide-gray-100">
               @for (p of filteredPaypads; track p.id) {
                 <li
                   (click)="focusOnPaypad(p)"
-                  class="cursor-pointer py-3 px-4 hover:bg-gray-50 active:bg-gray-100 transition-colors"
+                  class="cursor-pointer py-3 px-4 hover:bg-gray-50 active:bg-gray-100 transition-all duration-200"
                   [class.bg-blue-50]="selectedPayPad()?.id === p.id"
                   [class.border-l-4]="selectedPayPad()?.id === p.id"
                   [class.border-l-blue-500]="selectedPayPad()?.id === p.id">
-                  <div class="font-semibold text-gray-800 text-sm mb-1">
-                    {{ p.username }}
-                  </div>
-                  <div class="text-xs text-gray-500 mb-0.5">
-                    Estado: 
-                    <span class="font-medium">{{ p.status }}</span>
-                  </div>
-                  <div class="text-xs text-gray-400">
-                    ID: {{ p.id }}
+                  
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="flex-1 min-w-0">
+                      <div class="font-semibold text-gray-800 text-sm mb-1 truncate">
+                        {{ p.username }}
+                      </div>
+                      <div class="flex items-center gap-2 text-xs text-gray-500 mb-1">
+                        <span class="inline-flex items-center gap-1">
+                          <span class="w-2 h-2 rounded-full" 
+                            [ngClass]="{
+                              'bg-green-500': p.status === 1,
+                              'bg-red-500': p.status === 0,
+                              'bg-yellow-500': p.status === 2,
+                              'bg-blue-500': p.status === 3,
+                              'bg-orange-500': p.status === 4,
+                              'bg-gray-500': p.status !== 0 && p.status !== 1 && p.status !== 2 && p.status !== 3 && p.status !== 4
+                            }">
+                          </span>
+                          Estado {{ p.status }}
+                        </span>
+                      </div>
+                      <div class="text-xs text-gray-400">
+                        ID: {{ p.id }}
+                      </div>
+                    </div>
+                    @if (selectedPayPad()?.id === p.id) {
+                      <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                      </svg>
+                    }
                   </div>
                 </li>
               }
@@ -180,63 +227,73 @@
         
       </aside>
 
-      <section class="flex-1 relative overflow-hidden bg-gray-100">
-        <div id="map" class="absolute top-0 left-0 right-0 bottom-0"></div>
+      <!-- Mapa -->
+      <section class="flex-1 relative overflow-hidden bg-gray-100 min-h-[300px] lg:min-h-0">
+        <div id="map" class="absolute inset-0"></div>
       </section>
 
     </div>
   </div>
 
-  <div class="px-4">
-    <div class="bg-white rounded-lg p-3 shadow-md">
-      <h3 class="text-sm font-semibold text-gray-700 mb-3">Filtrar por estado:</h3>
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+  <!-- Filtros -->
+  <div class="px-4 lg:px-6">
+    <div class="bg-white rounded-lg p-4 lg:p-5 shadow-md">
+      <h3 class="text-sm lg:text-base font-semibold text-gray-700 mb-4">
+        Filtrar por estado:
+      </h3>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 lg:gap-3">
         
+        <!-- Todas -->
         <button 
           type="button" 
-          class="cursor-pointer flex flex-col items-center justify-center gap-1.5 p-3 bg-white border-2 border-gray-200 rounded-lg hover:border-gray-800 hover:bg-blue-50 transition-all font-semibold text-xs active:scale-95"
+          class="cursor-pointer flex flex-col items-center justify-center gap-1.5 p-3 lg:p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-gray-800 hover:bg-blue-50 hover:shadow-md transition-all font-semibold text-xs active:scale-95"
           (click)="setState(-1)">
-          <img src="AllMarker-removebg-preview.png" alt="Todas" class="w-7 h-7 object-contain">
-          <span>Todas</span>
+          <img src="AllMarker-removebg-preview.png" alt="Todas" class="w-6 h-6 lg:w-8 lg:h-8 object-contain">
+          <span class="text-center">Todas</span>
         </button>
 
+        <!-- Activas -->
         <button 
           type="button" 
-          class="cursor-pointer flex flex-col items-center justify-center gap-1.5 p-3 bg-white border-2 border-gray-200 rounded-lg hover:border-green-400 hover:bg-green-50 transition-all font-semibold text-xs active:scale-95"
+          class="cursor-pointer flex flex-col items-center justify-center gap-1.5 p-3 lg:p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-green-400 hover:bg-green-50 hover:shadow-md transition-all font-semibold text-xs active:scale-95"
           (click)="setState(1)">
-          <img src="ActiveMarker-removebg-preview.png" alt="Activas" class="w-7 h-7 object-contain">
-          <span>Activas</span>
+          <img src="ActiveMarker-removebg-preview.png" alt="Activas" class="w-6 h-6 lg:w-8 lg:h-8 object-contain">
+          <span class="text-center">Activas</span>
         </button>
 
+        <!-- Periférico -->
         <button 
           type="button" 
-          class="cursor-pointer flex flex-col items-center justify-center gap-1.5 p-3 bg-white border-2 border-gray-200 rounded-lg hover:border-yellow-400 hover:bg-yellow-50 transition-all font-semibold text-xs active:scale-95"
+          class="cursor-pointer flex flex-col items-center justify-center gap-1.5 p-3 lg:p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-yellow-400 hover:bg-yellow-50 hover:shadow-md transition-all font-semibold text-xs active:scale-95"
           (click)="setState(2)">
-          <img src="NoConnectionMarker-removebg-preview.png" alt="Periférico" class="w-7 h-7 object-contain">
+          <img src="NoConnectionMarker-removebg-preview.png" alt="Periférico" class="w-6 h-6 lg:w-8 lg:h-8 object-contain">
           <span class="text-center leading-tight">Periférico</span>
         </button>
 
+        <!-- Apagadas -->
         <button 
           type="button" 
-          class="cursor-pointer flex flex-col items-center justify-center gap-1.5 p-3 bg-white border-2 border-gray-200 rounded-lg hover:border-red-400 hover:bg-red-50 transition-all font-semibold text-xs active:scale-95"
+          class="cursor-pointer flex flex-col items-center justify-center gap-1.5 p-3 lg:p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-red-400 hover:bg-red-50 hover:shadow-md transition-all font-semibold text-xs active:scale-95"
           (click)="setState(0)">
-          <img src="offMarker-removebg-preview.png" alt="Apagadas" class="w-7 h-7 object-contain">
-          <span>Apagadas</span>
+          <img src="offMarker-removebg-preview.png" alt="Apagadas" class="w-6 h-6 lg:w-8 lg:h-8 object-contain">
+          <span class="text-center">Apagadas</span>
         </button>
 
+        <!-- Sin Internet -->
         <button 
           type="button" 
-          class="cursor-pointer flex flex-col items-center justify-center gap-1.5 p-3 bg-white border-2 border-gray-200 rounded-lg hover:border-cyan-400 hover:bg-cyan-50 transition-all font-semibold text-xs active:scale-95"
+          class="cursor-pointer flex flex-col items-center justify-center gap-1.5 p-3 lg:p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-cyan-400 hover:bg-cyan-50 hover:shadow-md transition-all font-semibold text-xs active:scale-95"
           (click)="setState(3)">
-          <img src="NoInternetMarker-removebg-preview.png" alt="Sin Internet" class="w-7 h-7 object-contain">
+          <img src="NoInternetMarker-removebg-preview.png" alt="Sin Internet" class="w-6 h-6 lg:w-8 lg:h-8 object-contain">
           <span class="text-center leading-tight">Sin Internet</span>
         </button>
 
+        <!-- Sin Dinero -->
         <button 
           type="button" 
-          class="cursor-pointer flex flex-col items-center justify-center gap-1.5 p-3 bg-white border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 transition-all font-semibold text-xs active:scale-95"
+          class="cursor-pointer flex flex-col items-center justify-center gap-1.5 p-3 lg:p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-orange-400 hover:bg-orange-50 hover:shadow-md transition-all font-semibold text-xs active:scale-95"
           (click)="setState(4)">
-          <img src="NoMoneyMarker-removebg-preview.png" alt="Sin Dinero" class="w-7 h-7 object-contain">
+          <img src="NoMoneyMarker-removebg-preview.png" alt="Sin Dinero" class="w-6 h-6 lg:w-8 lg:h-8 object-contain">
           <span class="text-center leading-tight">Sin Dinero</span>
         </button>
 
@@ -246,56 +303,69 @@
 
 </div>
 
+<!-- MODAL -->
 @if (showModal()) {
   <div class="modal-overlay" (click)="closeModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       
-      <div class="flex items-center justify-between p-5 border-b border-gray-200 bg-gray-800">
-        <div class="text-white font-bold">
-          <h2 class="text-xl font-bold">
+      <!-- Header Modal -->
+      <div class="flex items-center justify-between p-4 lg:p-5 border-b border-gray-200 bg-gradient-to-r from-gray-700 to-gray-900 flex-shrink-0">
+        <div class="text-white">
+          <h2 class="text-lg lg:text-xl font-bold truncate max-w-[250px] sm:max-w-none">
            {{ selectedPayPad()?.username }}
           </h2>
-          <p class="text-sm text-blue-100">ID: {{ selectedPayPad()?.id }}</p>
+          <p class="text-xs lg:text-sm text-blue-100">ID: {{ selectedPayPad()?.id }}</p>
         </div>
         <button 
           (click)="closeModal()" 
-          class="text-white hover:bg-white/20 rounded-lg p-2 transition-colors cursor-pointer">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          class="text-white hover:bg-white/20 rounded-lg p-2 transition-colors cursor-pointer flex-shrink-0">
+          <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
       </div>
 
-      <div class="modal-body p-5">
+      <!-- Body Modal -->
+      <div class="modal-body p-4 lg:p-6">
         @if (loading()) {
-          <p class="text-gray-500 text-center py-8">Cargando transacciones...</p>
+          <div class="flex flex-col items-center justify-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mb-4"></div>
+            <p class="text-gray-500 text-sm">Cargando transacciones...</p>
+          </div>
         } @else if (error()) {
-          <p class="text-red-600 text-center py-8">{{ error() }}</p>
+          <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+            <svg class="w-12 h-12 text-red-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="text-red-600 font-medium">{{ error() }}</p>
+          </div>
         } @else {
           
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <!-- Estadísticas -->
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3 mb-4 lg:mb-6">
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 lg:p-4">
               <div class="text-amber-600 text-xs font-medium mb-1">Total</div>
-              <div class="text-2xl font-bold text-amber-900">{{ totalTransacciones() }}</div>
+              <div class="text-xl lg:text-2xl font-bold text-amber-900">{{ totalTransacciones() }}</div>
             </div>
-            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div class="bg-green-50 border border-green-200 rounded-lg p-3 lg:p-4">
               <div class="text-green-600 text-xs font-medium mb-1">Aprobadas</div>
-              <div class="text-2xl font-bold text-green-900">{{ cantAprobada }}</div>
+              <div class="text-xl lg:text-2xl font-bold text-green-900">{{ cantAprobada }}</div>
             </div>
-            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="bg-red-50 border border-red-200 rounded-lg p-3 lg:p-4">
               <div class="text-red-600 text-xs font-medium mb-1">Canceladas</div>
-              <div class="text-2xl font-bold text-red-900">{{ cantCancelada }}</div>
+              <div class="text-xl lg:text-2xl font-bold text-red-900">{{ cantCancelada }}</div>
             </div>
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 lg:p-4">
               <div class="text-blue-600 text-xs font-medium mb-1">Iniciadas</div>
-              <div class="text-2xl font-bold text-blue-900">{{ cantIniciada }}</div>
+              <div class="text-xl lg:text-2xl font-bold text-blue-900">{{ cantIniciada }}</div>
             </div>
           </div>
 
-          <div class="grid md:grid-cols-2 gap-3 mb-6">
+          <!-- Totales -->
+          <div class="grid lg:grid-cols-2 gap-3 mb-4 lg:mb-6">
             <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-lg p-4">
-              <div class="text-sm font-medium opacity-90 mb-1">Total Recaudado</div>
-              <div class="text-3xl font-bold">{{ totalAmount | currency }}</div>
+              <div class="text-xs lg:text-sm font-medium opacity-90 mb-1">Total Recaudado</div>
+              <div class="text-2xl lg:text-3xl font-bold">{{ totalAmount | currency }}</div>
               @if (filteredTransactions().length) {
                 <div class="text-xs opacity-75 mt-2">
                   {{ filteredTransactions()[0].dateCreated | date : 'dd/MM/yyyy' }}
@@ -303,8 +373,8 @@
               }
             </div>
             <div class="bg-gradient-to-br from-red-500 to-red-600 text-white rounded-lg p-4">
-              <div class="text-sm font-medium opacity-90 mb-1">Total Retirado</div>
-              <div class="text-3xl font-bold">{{ totalRetirado() | currency }}</div>
+              <div class="text-xs lg:text-sm font-medium opacity-90 mb-1">Total Retirado</div>
+              <div class="text-2xl lg:text-3xl font-bold">{{ totalRetirado() | currency }}</div>
               @if (filteredTransactions().length) {
                 <div class="text-xs opacity-75 mt-2">
                   {{ filteredTransactions()[0].dateCreated | date : 'dd/MM/yyyy' }}
@@ -313,68 +383,77 @@
             </div>
           </div>
 
+          <!-- Transacciones -->
           <div>
-            <h3 class="font-semibold text-gray-700 mb-3 text-lg flex items-center gap-2">
+            <h3 class="font-semibold text-gray-700 mb-3 text-base lg:text-lg flex items-center gap-2">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
               Últimas 10 transacciones
             </h3>
+            
             @if (filteredTransactions().length === 0) {
               <div class="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-                <svg class="w-16 h-16 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-12 lg:w-16 h-12 lg:h-16 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                <p class="text-gray-500 italic">Sin transacciones registradas</p>
+                <p class="text-gray-500 text-sm italic">Sin transacciones registradas</p>
               </div>
             } @else {
-              <div class="space-y-2">
+              <div class="space-y-2 lg:space-y-3">
                 @for (t of filteredTransactions().slice(0, 10); track t.id) {
-                  <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-gray-100 transition-colors">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                      <div class="flex-1">
-                        <div class="flex items-center gap-2 mb-2">
-                          <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">
-                            #{{ t.id }}
-                          </span>
-                          <span class="text-sm font-medium text-gray-700">
-                            {{ t.typeTransaction }}
-                          </span>
-                          <span 
-                            class="text-xs px-2 py-1 rounded font-medium"
-                            [ngClass]="{
-                              'bg-green-100 text-green-800': t.stateTransaction.includes('Aprobada'),
-                              'bg-red-100 text-red-800': t.stateTransaction.includes('Cancelada'),
-                              'bg-blue-100 text-blue-800': t.stateTransaction.includes('Iniciada')
-                            }">
-                            {{ t.stateTransaction }}
-                          </span>
-                        </div>
-                        <div class="text-gray-600 text-sm space-y-1">
+                  <div class="bg-gray-50 border border-gray-200 rounded-lg p-3 lg:p-4 hover:bg-gray-100 transition-colors">
+                    <div class="flex flex-col gap-3">
+                      
+                      <!-- Header Transacción -->
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">
+                          #{{ t.id }}
+                        </span>
+                        <span class="text-xs lg:text-sm font-medium text-gray-700 truncate max-w-[150px]">
+                          {{ t.typeTransaction }}
+                        </span>
+                        <span 
+                          class="text-xs px-2 py-1 rounded font-medium"
+                          [ngClass]="{
+                            'bg-green-100 text-green-800': t.stateTransaction.includes('Aprobada'),
+                            'bg-red-100 text-red-800': t.stateTransaction.includes('Cancelada'),
+                            'bg-blue-100 text-blue-800': t.stateTransaction.includes('Iniciada')
+                          }">
+                          {{ t.stateTransaction }}
+                        </span>
+                      </div>
+
+                      <!-- Detalles -->
+                      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 lg:gap-4">
+                        <div class="text-gray-600 text-xs lg:text-sm space-y-1 flex-1 min-w-0">
                           <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
-                            {{ t.dateCreated | date : 'dd/MM/yyyy HH:mm' }}
+                            <span class="truncate">{{ t.dateCreated | date : 'dd/MM/yyyy HH:mm' }}</span>
                           </div>
-                          <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <div class="flex items-start gap-2">
+                            <svg class="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
                             </svg>
-                            {{ t.product }} · Ref: {{ t.reference }}
+                            <span class="truncate">{{ t.product }} · Ref: {{ t.reference }}</span>
                           </div>
                         </div>
-                      </div>
-                      <div class="flex gap-3 sm:flex-col sm:items-end flex-shrink-0">
-                        <div class="bg-cyan-50 text-cyan-700 font-bold px-3 py-2 rounded-lg text-sm">
-                          + {{ t.incomeAmount | currency }}
-                        </div>
-                        @if (t.returnAmount > 0) {
-                          <div class="bg-rose-50 text-rose-700 font-bold px-3 py-2 rounded-lg text-sm">
-                            - {{ t.returnAmount | currency }}
+
+                        <!-- Montos -->
+                        <div class="flex gap-2 lg:flex-col lg:items-end flex-shrink-0">
+                          <div class="bg-cyan-50 text-cyan-700 font-bold px-3 py-2 rounded-lg text-xs lg:text-sm whitespace-nowrap">
+                            + {{ t.incomeAmount | currency }}
                           </div>
-                        }
+                          @if (t.returnAmount > 0) {
+                            <div class="bg-rose-50 text-rose-700 font-bold px-3 py-2 rounded-lg text-xs lg:text-sm whitespace-nowrap">
+                              - {{ t.returnAmount | currency }}
+                            </div>
+                          }
+                        </div>
                       </div>
+
                     </div>
                   </div>
                 }
@@ -384,8 +463,6 @@
 
         }
       </div>
-
-
 
     </div>
   </div>
