@@ -6,7 +6,7 @@ import { Response } from '../Interfaces/response';
 import { Observable } from 'rxjs';
 //import * as CryptoJS from 'crypto-js';
 import { JSEncrypt } from 'jsencrypt';
-import { PayPadResponse } from '../Interfaces/locations';
+import { PayPadResponse, SubscriptionResponse } from '../Interfaces/locations';
 import { TransactionResponse } from '../Interfaces/transactions';
 
 
@@ -66,7 +66,6 @@ export class Api {
   Login(credentials: LoginDto): Observable<Response> {
     const headers = this.getHeaders();
     
-    // Encriptar la contraseña antes de enviar
     const loginData = {
       ...credentials,
       password: this.encryptPwd(credentials.pwd)
@@ -138,6 +137,14 @@ export class Api {
     );
   }
 
+  GetAllSubscriptions(): Observable<SubscriptionResponse> {
+    const headers = this.getHeaders(true);
+    
+    return this.http.get<SubscriptionResponse>(
+      `${environment.API_URL}/api/Alerts/Subscription`,
+      { headers }
+    );
+  }
   GetTransactionsById(idPaypad:number): Observable<TransactionResponse> {
     const headers = this.getHeaders(true);
     
