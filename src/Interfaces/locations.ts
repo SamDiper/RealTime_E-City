@@ -54,3 +54,24 @@ export interface SP_GET_STATE_PAYPLUS_Data_Result{
   _paypadsSinDinero:number;
   _paypadFilterPaypad:any;
 }
+
+export interface SubscriptionResponse {
+  statusCode: number;
+  message: string;
+  response: PaypadAlert[];
+}
+
+export interface PaypadAlert {
+  idPayPad: number;
+  paypad: string;
+  idAlert: number;
+  alert: string;
+  email: string;
+  id: number;
+  idUserCreated: number;
+  userCreated: string;
+  dateCreated: string; 
+  idUserUpdated: number;
+  userUpdated: string | null;
+  dateUpdated: string | null;
+}
