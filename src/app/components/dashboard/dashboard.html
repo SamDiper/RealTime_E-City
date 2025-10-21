@@ -133,7 +133,17 @@
     }
   }
 </style>
-
+<div class="fixed top-2 right-2 z-50 bg-gray-800 text-white text-xs px-3 py-2 rounded-lg shadow-lg">
+  <div class="flex items-center gap-2">
+    @if (isPolling()) {
+      <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+      <span>Actualización automática activa</span>
+    }
+    <div class="text-gray-400">
+      Última actualización registrada: {{ lastPollingTime() | date:'HH:mm:ss' }}
+    </div>
+  </div>
+</div>
 <div class="bg-gray-800 p-1 pt-10 min-h-screen lg:min-h-0">
   
       <div class="text-center mb-8 lg:mb-12">

@@ -25,6 +25,7 @@ import {
   PaypadAlert,
 } from '../../../Interfaces/locations';
 import { Transaction, TransactionResponse } from '../../../Interfaces/transactions';
+import { PollingService } from '../../../Services/pollingService';
 
 type PaymentOption = { label: string; value: string | null };
 type MarkerWithUrl = L.Marker & { customIconUrl: string; paypadId: number };
@@ -44,6 +45,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
 
   route = inject(Router);
   http = inject(HttpClient);
+  private pollingService = inject(PollingService);
 
   _currentYear: number = new Date().getFullYear();
 
@@ -123,6 +125,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     }
 
     this.cargarUbicaciones();
+    this.startRealtimeMonitoring();
   }
 
   ngAfterViewInit(): void {
@@ -136,6 +139,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
 
   ngOnDestroy(): void {
     this.map?.remove();
+    this.pollingService.stopPolling(); // ← Detener polling
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -410,4 +414,25 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     const p = this.filteredPaypads?.find((pp) => pp.id === id);
     if (p) this.focusOnPaypad(p);
   }
+
+// En dashboard.component.ts
+  lastPollingTime = signal<Date>(new Date());
+  isPolling = signal<boolean>(false);
+
+  private startRealtimeMonitoring() {
+    this.pollingService.subscriptions$.subscribe({
+      next: (subs) => {
+        this.lastPollingTime.set(new Date()); 
+        this.subscriptions = subs;
+        this.mergeSubscriptions();
+        this.applyFilter();
+        this.redrawMarkers();
+      }
+    });
+
+    this.isPolling.set(true);
+    this.pollingService.startSubscriptionsPolling(120000);
+  
+  }
+  
 }
