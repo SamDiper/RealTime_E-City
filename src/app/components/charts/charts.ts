@@ -16,7 +16,7 @@ Chart.register(...registerables);
   selector: "app-charts",
   templateUrl: "./charts.html",
   imports: [CommonModule, FormsModule],
-  styleUrl:'../../../output.css'
+  styleUrls: ['../../../output.css'],
 })
 export class Charts implements OnInit {
   @ViewChild("payChart") payChartRef!: ElementRef<HTMLCanvasElement>;

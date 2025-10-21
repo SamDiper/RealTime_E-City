@@ -14,6 +14,7 @@ import { Response } from '../../../Interfaces/response';
   imports: [ FormsModule, ReactiveFormsModule ],
   templateUrl: './login.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrls: ['../../../output.css'],
 })
 export class Login {
 
