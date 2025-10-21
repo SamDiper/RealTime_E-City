@@ -1,0 +1,216 @@
+<div class="fixed top-2 right-2 z-50 bg-gray-800 text-white text-xs px-3 py-2 rounded-lg shadow-lg">
+  <div class="flex items-center gap-2">
+    <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+    <span>Actualización automática activa</span>
+    <div class="text-gray-400">
+      Cada 2 minutos
+    </div>
+  </div>
+</div>
+
+<div class="bg-gray-800 p-1 pt-10 min-h-screen">
+  
+  <div class="text-center mb-8 lg:mb-12">
+    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white mb-3 tracking-tight">
+      Transacciones Recientes
+    </h1>
+  </div>
+
+  <div class="px-4 lg:px-6 mb-4">
+    <div class="max-w-7xl mx-auto flex justify-end">
+      <button 
+        (click)="refresh()"
+        [disabled]="loading()"
+        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl active:scale-95">
+        <svg 
+          class="w-5 h-5" 
+          [class.animate-spin]="loading()"
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        {{ loading() ? 'Actualizando...' : 'Actualizar ahora' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="px-4 lg:px-6 mb-6">
+    <div class="max-w-7xl mx-auto">
+      <div class="bg-white rounded-lg p-4 lg:p-5 shadow-xl">
+        <h3 class="text-sm lg:text-base font-semibold text-gray-700 mb-4">
+          Estadísticas de las últimas 10 transacciones:
+        </h3>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          
+          <div class="bg-gradient-to-br from-gray-100 to-gray-200 p-3 rounded-lg border border-gray-300">
+            <div class="text-gray-600 text-xs font-medium mb-1">Total</div>
+            <div class="text-2xl font-bold text-gray-800">{{ stats().total }}</div>
+          </div>
+          
+          <div class="bg-gradient-to-br from-green-50 to-green-100 p-3 rounded-lg border border-green-300">
+            <div class="text-green-600 text-xs font-medium mb-1 flex items-center gap-1">
+              <span>✅</span> Aprobadas
+            </div>
+            <div class="text-2xl font-bold text-green-800">{{ stats().aprobadas }}</div>
+          </div>
+          
+          <div class="bg-gradient-to-br from-red-50 to-red-100 p-3 rounded-lg border border-red-300">
+            <div class="text-red-600 text-xs font-medium mb-1 flex items-center gap-1">
+              <span>❌</span> Canceladas
+            </div>
+            <div class="text-2xl font-bold text-red-800">{{ stats().canceladas }}</div>
+          </div>
+          
+          <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-3 rounded-lg border border-blue-300">
+            <div class="text-blue-600 text-xs font-medium mb-1 flex items-center gap-1">
+              <span>🔄</span> Iniciadas
+            </div>
+            <div class="text-2xl font-bold text-blue-800">{{ stats().iniciadas }}</div>
+          </div>
+          
+          <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-3 rounded-lg shadow-md">
+            <div class="text-xs font-medium mb-1 opacity-90">Recaudado</div>
+            <div class="text-xl lg:text-2xl font-bold">{{ stats().totalRecaudado | currency:'$':'symbol':'1.0-0' }}</div>
+          </div>
+          
+          <div class="bg-gradient-to-br from-red-500 to-red-600 text-white p-3 rounded-lg shadow-md">
+            <div class="text-xs font-medium mb-1 opacity-90">Retirado</div>
+            <div class="text-xl lg:text-2xl font-bold">{{ stats().totalRetirado | currency:'$':'symbol':'1.0-0' }}</div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="px-4 lg:px-6 pb-6">
+    <div class="max-w-7xl mx-auto">
+      
+      @if (loading()) {
+        <div class="bg-white rounded-lg shadow-xl p-12 text-center">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p class="text-gray-500">Cargando transacciones...</p>
+        </div>
+      } @else if (recentTransactions().length === 0) {
+        <div class="bg-white rounded-lg shadow-xl p-12 text-center">
+          <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <p class="text-gray-500 text-lg font-medium">No hay transacciones</p>
+          <p class="text-gray-400 text-sm mt-1">Aún no se han registrado transacciones en el sistema</p>
+        </div>
+      } @else {
+        <div class="bg-white rounded-lg shadow-xl overflow-hidden">
+          
+          <div class="bg-gray-700 text-white p-4 lg:p-5">
+            <h2 class="text-lg lg:text-xl font-bold flex items-center gap-2">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Últimas 10 Transacciones
+            </h2>
+            <p class="text-xs lg:text-sm text-blue-100 mt-1">
+              Ordenadas de más reciente a más antigua
+            </p>
+          </div>
+
+          <div class="transactions-list-container">
+            <div class="divide-y divide-gray-200">
+              @for (tx of recentTransactions(); track tx.id) {
+                <div class="transaction-item p-4 lg:p-5 hover:bg-gray-50 transition-all duration-200">
+                  
+                  <div class="flex flex-col lg:flex-row lg:items-center gap-4">
+                    
+                    <div class="flex items-center gap-3 flex-shrink-0">
+                      <div class="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold text-sm shadow-md">
+                        {{ tx.id }}
+                      </div>
+                      <div class="flex-shrink-0">
+                        <span 
+                          class="inline-block text-xs px-3 py-1.5 rounded-full font-semibold border-2"
+                          [ngClass]="getStateClass(tx.stateTransaction)">
+                          {{ tx.stateTransaction }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                      <div class="font-bold text-gray-800 truncate text-sm lg:text-base">
+                        {{ getPayPadName(tx.idPayPad) }}
+                      </div>
+                      <div class="text-sm text-gray-600 truncate mt-1">
+                        {{ tx.product }}
+                      </div>
+                      <div class="flex items-center gap-2 text-xs text-gray-400 mt-2">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        {{ tx.dateCreated | date:'dd/MM/yyyy HH:mm:ss' }}
+                      </div>
+                    </div>
+
+                    <div class="flex gap-3 flex-shrink-0 justify-end">
+                      <div class="text-center bg-gray-50 rounded-lg p-2 lg:p-3 min-w-[90px] border border-gray-200">
+                        <div class="text-xs text-gray-500 mb-1">Total</div>
+                        <div class="font-bold text-gray-900 text-sm lg:text-base">
+                          {{ tx.totalAmount | currency:'$':'symbol':'1.0-0' }}
+                        </div>
+                      </div>
+                      
+                      @if ((tx.incomeAmount || 0) > 0) {
+                        <div class="text-center bg-green-50 rounded-lg p-2 lg:p-3 min-w-[90px] border border-green-200">
+                          <div class="text-xs text-green-600 mb-1">Recaudado</div>
+                          <div class="font-bold text-green-700 text-sm lg:text-base">
+                            +{{ (tx.incomeAmount || 0) | currency:'$':'symbol':'1.0-0' }}
+                          </div>
+                        </div>
+                      }
+                      
+                      @if ((tx.returnAmount || 0) > 0) {
+                        <div class="text-center bg-red-50 rounded-lg p-2 lg:p-3 min-w-[90px] border border-red-200">
+                          <div class="text-xs text-red-600 mb-1">Retirado</div>
+                          <div class="font-bold text-red-700 text-sm lg:text-base">
+                            -{{ (tx.returnAmount || 0) | currency:'$':'symbol':'1.0-0' }}
+                          </div>
+                        </div>
+                      }
+                    </div>
+
+                  </div>
+
+                  @if (tx.reference || tx.typePayment) {
+                    <div class="mt-3 pt-3 border-t border-gray-100 flex flex-wrap gap-3 lg:gap-4 text-xs">
+                      @if (tx.reference) {
+                        <div class="flex items-center gap-1.5 text-gray-600">
+                          <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                          </svg>
+                          <span class="font-medium">Ref:</span> 
+                          <span class="font-mono">{{ tx.reference }}</span>
+                        </div>
+                      }
+                      @if (tx.typePayment) {
+                        <div class="flex items-center gap-1.5 text-gray-600">
+                          <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                          </svg>
+                          <span class="font-medium">Tipo:</span> 
+                          <span>{{ tx.typePayment }}</span>
+                        </div>
+                      }
+                    </div>
+                  }
+
+                </div>
+              }
+            </div>
+          </div>
+
+        </div>
+      }
+
+    </div>
+  </div>
+
+</div>
