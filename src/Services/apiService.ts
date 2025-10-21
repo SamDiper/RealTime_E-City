@@ -105,10 +105,7 @@ export class Api {
     );
   }
 
-  /**
-   * Obtener todos los usuarios
-   * @returns Observable con la lista de usuarios
-   */
+
   GetAllUsers(): Observable<Response> {
     const headers = this.getHeaders(true);
     
