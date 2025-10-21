@@ -385,7 +385,6 @@ export class Charts implements OnInit {
     this.selectedPaypadId = idStr;
 
     if (idStr === "all") {
-      // Opción "Todos"
       this.GetAllTransaction();
       return;
     }
