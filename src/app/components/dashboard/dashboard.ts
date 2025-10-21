@@ -26,6 +26,7 @@ import {
 } from '../../../Interfaces/locations';
 import { Transaction, TransactionResponse } from '../../../Interfaces/transactions';
 import { PollingService } from '../../../Services/pollingService';
+import { ToastService } from '../../../Services/toastService';
 
 type PaymentOption = { label: string; value: string | null };
 type MarkerWithUrl = L.Marker & { customIconUrl: string; paypadId: number };
@@ -45,7 +46,8 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
 
   route = inject(Router);
   http = inject(HttpClient);
-  private pollingService = inject(PollingService);
+  pollingService = inject(PollingService);
+  toastService = inject(ToastService);
 
   _currentYear: number = new Date().getFullYear();
 
@@ -123,7 +125,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
       this.Exit();
       return;
     }
-
+    
     this.cargarUbicaciones();
     this.startRealtimeMonitoring();
   }
