@@ -1,11 +1,12 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { ToastComponent } from './components/toast/toast';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ToastComponent],
   templateUrl: './app.html',
   styleUrls: ['./app.css','../output.css']
 })
