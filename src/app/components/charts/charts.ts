@@ -45,7 +45,10 @@ export class Charts implements OnInit {
   _donutTxTotal = 0;
   _donutCompareSeries = [0, 0];
 
-  showEmptyState = true; // Mostrar estado vacío al inicio
+  showEmptyState = true;
+
+  private excludedPayPadIds: number[] = [];
+  private excludedPayPadNames = ['Pay+ Prueba1']; 
 
   constructor(private _api: Api, private _router: Router) {}
 
@@ -63,6 +66,11 @@ export class Charts implements OnInit {
       next: (res: PayPadResponse) => {
         if (res.statusCode === 200 && res.response) {
           this._paypads = res.response;
+          
+          this.excludedPayPadIds = res.response
+            .filter(p => this.excludedPayPadNames.includes(p.username))
+            .map(p => p.id);
+          
         }
       },
       error: (err) => console.error(err)
@@ -73,9 +81,12 @@ export class Charts implements OnInit {
     this._api.GetAllTransactions().subscribe({
       next: (res: TransactionResponse) => {
         if (res.statusCode === 200 && res.response) {
-          this._transactions = res.response.slice();
+          const filtered = this.filterExcludedTransactions(res.response);
+          
+          this._transactions = filtered.slice();
           this.renderFromTransactions(this._transactions);
           this.showEmptyState = false;
+          
         } else {
           console.log("Api:", res.message);
           this.renderFromTransactions([]);
@@ -89,6 +100,12 @@ export class Charts implements OnInit {
   }
 
   GetTransactionsByPaypadId(id: number) {
+    if (this.excludedPayPadIds.includes(id)) {
+      this.renderFromTransactions([]);
+      this.showEmptyState = true;
+      return;
+    }
+
     this._api.GetTransactionsById(id).subscribe({
       next: (res: TransactionResponse) => {
         if (res.statusCode === 200 && res.response) {
@@ -105,6 +122,16 @@ export class Charts implements OnInit {
         this.renderFromTransactions([]);
       }
     });
+  }
+
+  private filterExcludedTransactions(transactions: Transaction[]): Transaction[] {
+    if (this.excludedPayPadIds.length === 0) {
+      return transactions;
+    }
+    
+    return transactions.filter(tx => 
+      !this.excludedPayPadIds.includes(tx.idPayPad)
+    );
   }
 
   private renderFromTransactions(transactions: Transaction[]) {
@@ -158,12 +185,13 @@ export class Charts implements OnInit {
         datasets: [{
           label: 'Pagos',
           data: this._chartNumbersPays,
-          borderColor: '#22c55e',
-          backgroundColor: this.createGradient(ctx, '#22c55e', '#86efac'),
+          borderColor: '#4fa1ff',
+          backgroundColor: this.createGradient(ctx, '#0059bf', '#4fa1ff'),
           fill: true,
-          tension: 0.4,
+          tension: 0.1,
           pointRadius: 0,
-          pointHoverRadius: 5
+          pointHoverRadius: 5,
+          borderWidth: 0.5
         }]
       },
       options: this.getLineChartOptions('$')
@@ -185,11 +213,12 @@ export class Charts implements OnInit {
           label: 'Retiros',
           data: this._chartNumbersWithdrawals,
           borderColor: '#dc2626',
-          backgroundColor: this.createGradient(ctx, '#dc2626', '#fca5a5'),
+          backgroundColor: this.createGradient(ctx, '#dc2626', '#8c0000'),
           fill: true,
-          tension: 0.4,
+          tension: 0.1,
           pointRadius: 0,
-          pointHoverRadius: 5
+          pointHoverRadius: 5,
+          borderWidth: 0.5
         }]
       },
       options: this.getLineChartOptions('$')
@@ -211,11 +240,12 @@ export class Charts implements OnInit {
           label: 'Transacciones',
           data: this._chartNumbersTransactions,
           borderColor: '#9333ea',
-          backgroundColor: this.createGradient(ctx, '#9333ea', '#d8b4fe'),
+          backgroundColor: this.createGradient(ctx, '#470089', '#9333ea'),
           fill: true,
-          tension: 0.4,
+          tension: 0.1,
           pointRadius: 0,
-          pointHoverRadius: 5
+          pointHoverRadius: 5,
+          borderWidth: 0.5
         }]
       },
       options: this.getLineChartOptions('')
@@ -236,25 +266,25 @@ export class Charts implements OnInit {
         labels: ['Pagos', 'Retiros'],
         datasets: [{
           data: this._donutCompareSeries,
-          backgroundColor: ['#22c55e', '#dc2626'],
+          backgroundColor: ['#4fa1ff', '#dc2626'],
           borderWidth: 0
         }]
       },
       options: {
         responsive: true,
-        maintainAspectRatio: true, // 👈 Importante: mantiene proporción
-        aspectRatio: 2, // 👈 CLAVE: 2 = más ancho que alto (más pequeño verticalmente)
-        cutout: '70%', // 👈 Grosor del donut (70% = más delgado)
+        maintainAspectRatio: false,
+        aspectRatio: 2,
+        cutout: '70%',
         plugins: {
           legend: {
             position: 'bottom',
             labels: { 
               color: '#6b7280',
-              font: { size: 11 }, // 👈 Tamaño de texto de leyenda
-              padding: 10, // 👈 Espaciado entre ítems
+              font: { size: 11 },
+              padding: 10,
               usePointStyle: true,
               pointStyle: 'circle',
-              boxWidth: 8 // 👈 Tamaño de los círculos de colores
+              boxWidth: 8
             }
           },
           tooltip: {
@@ -276,9 +306,9 @@ export class Charts implements OnInit {
           },
           title: {
             display: true,
-            text: `${this._donutTxTotal.toLocaleString()} tx`, // 👈 Más corto
+            text: `${this._donutTxTotal.toLocaleString()} tx`,
             color: '#6b7280',
-            font: { size: 12 }, // 👈 Más pequeño
+            font: { size: 12 },
             padding: { top: 0, bottom: 10 }
           }
         },
@@ -304,7 +334,7 @@ export class Charts implements OnInit {
   private getLineChartOptions(prefix: string): ChartConfiguration['options'] {
     return {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       interaction: {
         mode: 'index',
         intersect: false
@@ -390,7 +420,6 @@ export class Charts implements OnInit {
     }
 
     if (!idStr) {
-      // Limpiar charts
       this.showEmptyState = true;
       this.destroyAllCharts();
       return;
