@@ -1,3 +1,17 @@
+@if (router.url !== '/login') {
+  <div class="fixed top-2 right-2 z-[9999] bg-gray-800/95 backdrop-blur-sm text-white rounded-lg shadow-lg border border-gray-700">
+    <div class="flex items-center gap-2 sm:gap-3 px-3 py-2 text-[10px] sm:text-xs whitespace-nowrap">
+      @if (isPolling()) {
+        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+        <span class="font-medium">Auto-actualización activa</span>
+        <div class="w-px h-4 bg-gray-600"></div>
+        <span class="text-gray-400">Cada 2 min</span>
+        <div class="w-px h-4 bg-gray-600"></div>
+        <span class="text-gray-300">{{ lastPollingTime() | date:'HH:mm:ss' }}</span>
+      }
+    </div>
+  </div>
+}
 <div class="relative flex h-dvh w-full bg-gray-50 overflow-hidden">
   @if (router.url !== '/login') {
     
