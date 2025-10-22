@@ -46,8 +46,8 @@ export class Api {
       if (!encrypted) {
         throw new Error('Falló la encriptación de la contraseña');
       }
-
-      return encrypted; // Ya viene en Base64
+      console.log(encrypted)
+      return encrypted;
     }
 
  private getHeaders(includeAuth: boolean = false): HttpHeaders {

@@ -1,5 +1,3 @@
-// Services/pollingService.ts
-
 import { Injectable, inject } from '@angular/core';
 import { interval, Subject, BehaviorSubject } from 'rxjs';
 import { switchMap, startWith, catchError, takeUntil, distinctUntilChanged, tap } from 'rxjs/operators';
@@ -36,8 +34,8 @@ export class PollingService {
         takeUntil(this.destroy$),
         catchError((error) => {
           this.toastService.error(
-            '❌ Error de Conexión',
-            'No se pudo obtener el estado de los kioskos'
+            'Error de Conexión',
+            'No se pudo obtener el estado de los paypads'
           );
           
           return [];
@@ -93,7 +91,7 @@ export class PollingService {
         this.toastService.error(
           ` ALERTA CRÍTICA`,
           `${alert.paypad}: ${alert.alert}`,
-          10000  // 10 segundos
+          10000
         );
       });
 

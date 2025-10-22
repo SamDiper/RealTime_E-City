@@ -1,38 +1,38 @@
-import { Component, inject } from '@angular/core';
-import {ChangeDetectionStrategy, signal} from '@angular/core';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {FormControl, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {merge} from 'rxjs';
-import { Auth } from '../../../Services/authService';
-import { Api } from '../../../Services/apiService';
+// components/login/login.ts
+import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { merge } from 'rxjs';
 import { Router } from '@angular/router';
-import { LoginDto } from '../../../Interfaces/login';
-import { Response } from '../../../Interfaces/response';
+import { Auth } from '../../../Services/authService';
+
 
 @Component({
   selector: 'app-login',
-  imports: [ FormsModule, ReactiveFormsModule ],
+  standalone: true,
+  imports: [FormsModule, ReactiveFormsModule],
   templateUrl: './login.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrls: ['../../../output.css'],
 })
 export class Login {
-
   readonly user = new FormControl('', [Validators.required]);
   readonly password = new FormControl('', [Validators.required]);
 
   showPassword = signal(false);
   errorMessage = signal('');
   loading = signal(false);
-  
-  private readonly _apiComponent = inject(Api);
+
+  private readonly authService = inject(Auth); 
   private readonly router = inject(Router);
 
   _currentYear: number = new Date().getFullYear();
+
   constructor() {
     merge(this.user.statusChanges, this.user.valueChanges)
       .pipe(takeUntilDestroyed())
-      .subscribe(() => this.updateEmailErrorMessage());
+      .subscribe(() => this.updateUserErrorMessage());
   }
 
   togglePasswordVisibility(event: MouseEvent) {
@@ -40,62 +40,70 @@ export class Login {
     event.stopPropagation();
   }
 
+  ngOnInit(): void {
+    localStorage.clear();
+  }
+
   onSubmit(): void {
-    if (this.user.valid && this.password.valid) {
-      this.loading.set(true);
-           console.log('OnSubmit');
-
-      const loginData: LoginDto = {
-        userName: this.user.value!.trim(),
-        pwd: this.password.value!
-      };
-     console.log('Login data:', loginData);
-      this._apiComponent.Login(loginData).subscribe({
-        next: (response: any) => {
-         console.log('Response:', response);
-         console.log('Status Code:', response.statusCode);
-         console.log('Status Code:', response);
-          if (response.statusCode === 200 && typeof response.response === 'string') {
-              const token = response.response;
-
-              localStorage.setItem("token", token);
-              localStorage.setItem("session", token);
-              localStorage.setItem("User", loginData.userName);
-
-              this.router.navigate(['/dashboard']);
-              console.log('Token:', token);
-            } else {
-              this.loading.set(false);
-              this.errorMessage.set(response?.message || "Credenciales incorrectas");
-            }
-        },
-        error: (error: any) => {
-          this.loading.set(false);
-          if (error.status === 400) {
-            this.errorMessage.set("Usuario y/o contraseña incorrecto");
-          } else if (error.status === 0) {
-            this.errorMessage.set("No se pudo conectar con el servidor. Revise su conexión");
-          } else if (error.status === 401) {
-            this.errorMessage.set("Credenciales inválidas");
-          } else {
-            this.errorMessage.set(error.error?.message || "Error interno del servidor");
-          }
-          console.error('Error de login:', error);
-        }
-      });
-    } else {
-
-      this.updateEmailErrorMessage();
+    if (!this.user.valid || !this.password.valid) {
+      this.updateUserErrorMessage();
       this.updatePasswordErrorMessage();
-    
-  } 
-}
+      return;
+    }
 
-  updateEmailErrorMessage() {
+    this.loading.set(true);
+    this.errorMessage.set('');
+
+    const credentials = {
+      userName: this.user.value!.trim(),
+      password: this.password.value!  
+    };
+
+    this.authService.login(credentials).subscribe({
+      next: (response: any) => {
+
+        if (response.statusCode === 200 && response.response) {
+          const token = typeof response.response === 'string' 
+            ? response.response 
+            : response.response.token;
+
+          localStorage.setItem('token', token);
+          localStorage.setItem('session', token);
+          localStorage.setItem('User', credentials.userName);
+
+
+          this.router.navigate(['/dashboard']);
+        } else {
+          this.loading.set(false);
+          const errorMsg = response?.message || 'Credenciales incorrectas';
+          this.errorMessage.set(errorMsg);
+          
+        }
+      },
+      error: (error: any) => {
+        this.loading.set(false);
+
+
+        let errorMsg = 'Error interno del servidor';
+
+        if (error.status === 400) {
+          errorMsg = 'Usuario y/o contraseña incorrecto';
+        } else if (error.status === 0) {
+          errorMsg = 'No se pudo conectar con el servidor. Revise su conexión';
+        } else if (error.status === 401) {
+          errorMsg = 'Credenciales inválidas';
+        } else if (error.error?.message) {
+          errorMsg = error.error.message;
+        }
+
+        this.errorMessage.set(errorMsg);
+      }
+    });
+  }
+
+  updateUserErrorMessage() {
     if (this.user.hasError('required')) {
       this.errorMessage.set('El usuario es requerido');
-    } else if (this.user.hasError('email')) {
-      this.errorMessage.set('Usuario no válido');
     } else {
       this.errorMessage.set('');
     }
