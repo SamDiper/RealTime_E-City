@@ -137,11 +137,12 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
       requestAnimationFrame(() => this.map?.invalidateSize());
       setTimeout(() => this.map?.invalidateSize(), 250);
     });
+
   }
 
   ngOnDestroy(): void {
     this.map?.remove();
-    this.pollingService.stopPolling(); // ← Detener polling
+    this.pollingService.stopPolling(); 
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -178,6 +179,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
   }
 
   private initMap(): void {
+    
     const colombiaBounds = L.latLngBounds(
       L.latLng(-4.2316872, -79.0237629),
       L.latLng(12.4373032, -66.8511907)
@@ -209,14 +211,16 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
           this.mergeSubscriptions();
           this.applyFilter();
           this.redrawMarkers();
+
         },
         error: (err) => {
           console.error('Error al cargar paypads o subscriptions:', err);
         },
       });
     } catch (err) {
-      console.error('Error en cargarUbicaciones (await):', err);
+      console.error('Error en cargarUbicaciones:', err);
     }
+    
   }
 
   private redrawMarkers(): void {
@@ -417,7 +421,6 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     if (p) this.focusOnPaypad(p);
   }
 
-// En dashboard.component.ts
   lastPollingTime = signal<Date>(new Date());
   isPolling = signal<boolean>(false);
 
@@ -433,7 +436,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     });
 
     this.isPolling.set(true);
-    this.pollingService.startSubscriptionsPolling(120000);
+    this.pollingService.startSubscriptionsPolling(60000);
   
   }
   

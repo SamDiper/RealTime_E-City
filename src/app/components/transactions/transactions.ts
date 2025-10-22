@@ -1,4 +1,3 @@
-// components/transactions/transactions.ts
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -122,7 +121,7 @@ export class Transactions implements OnInit {
   private startAutoRefresh() {
     setInterval(() => {
       this.loadData();
-    }, 120000); // 2 minutos
+    }, 60000); // 1 minutos
   }
 
   getPayPadName(id: number): string {
