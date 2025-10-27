@@ -26,7 +26,7 @@ export class App implements OnInit, OnDestroy {
     return `
       fixed lg:static
       ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      h-full
+      h-full z-40
     `.trim();
   });
 
@@ -46,7 +46,6 @@ export class App implements OnInit, OnDestroy {
     });
 
     this.pollingService.startSubscriptionsPolling(60000);
-    
   }
 
   toggleSidebar() {

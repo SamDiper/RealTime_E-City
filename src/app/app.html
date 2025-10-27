@@ -12,6 +12,7 @@
     </div>
   </div>
 }
+
 <div class="relative flex h-dvh w-full bg-gray-50 overflow-hidden">
   @if (router.url !== '/login') {
     
@@ -43,13 +44,12 @@
     @if (sidebarOpen()) {
       <div 
         (click)="closeSidebar()"
-        class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden transition-opacity duration-300"
-        [@fadeIn]>
+        class="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden transition-opacity duration-300">
       </div>
     }
 
     <aside 
-      class="flex-shrink-0 w-64 bg-white border-r border-gray-200 flex flex-col justify-between transition-transform duration-300 ease-in-out z-40">
+      [class]="sidebarClasses() + ' flex-shrink-0 w-64 bg-white border-r border-gray-200 flex flex-col justify-between transition-transform duration-300 ease-in-out'">
       
       <div class="mt-12 p-6 border-b border-gray-200">
         <a href="https://www.e-city.co/" target="_blank">
@@ -158,4 +158,5 @@
     </div>
   }
 </div>
+
 <app-toast></app-toast>
