@@ -120,7 +120,7 @@ export class Transactions implements OnInit {
   private startAutoRefresh() {
     setInterval(() => {
       this.loadData();
-    }, 120000); // 1 minutos
+    }, 300000); // 5min
   }
 
   getPayPadName(id: number): string {

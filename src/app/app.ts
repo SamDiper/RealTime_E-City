@@ -14,8 +14,9 @@ import { PollingService } from '../Services/pollingService';
 })
 export class App implements OnInit, OnDestroy { 
   router = inject(Router);
-  private pollingService = inject(PollingService);
-  
+  pollingService = inject(PollingService);
+  refreshInterval: any;
+
   sidebarOpen = signal(false);
 
   isPolling = signal(true);
@@ -32,10 +33,22 @@ export class App implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.startGlobalPolling();
+    this.startAutoRefresh();
   }
 
   ngOnDestroy(): void {
     this.pollingService.stopPolling();
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
+  }
+
+    private startAutoRefresh() {
+    this.refreshInterval = setInterval(() => {
+      if (this.router.url !== '/login') {
+        window.location.reload();
+      }
+    }, 1200000);// 20min
   }
 
   private startGlobalPolling() {
@@ -45,7 +58,7 @@ export class App implements OnInit, OnDestroy {
       }
     });
 
-    this.pollingService.startSubscriptionsPolling(60000);
+    this.pollingService.startSubscriptionsPolling(300000);// 5min
   }
 
   toggleSidebar() {
