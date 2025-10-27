@@ -39,6 +39,8 @@ type MarkerWithUrl = L.Marker & { customIconUrl: string; paypadId: number };
   styleUrls: ['../../../output.css'],
 })
 export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
+  initialLoading = signal(true);
+
   private map: L.Map | undefined;
   private markers: MarkerWithUrl[] = [];
   private _api = inject(Api);
@@ -102,7 +104,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
         el.stateTransaction === 'Aprobada Sin Notificar'
       ) {
         this.cantAprobada++;
-        this.totalAmount += this.num(el.totalAmount);
+        this.totalAmount += el.totalAmount;
       }
       if (el.stateTransaction === 'Iniciada') {
         this.cantIniciada++;
@@ -113,21 +115,37 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
 
   totalTransacciones = computed(() => this.filteredTransactions().length);
   totalRecaudado = computed(() =>
-    this.filteredTransactions().reduce((acc, t) => acc + this.num(t.incomeAmount ?? 0), 0)
+      this.transactions() 
+          .filter(t => t.stateTransaction?.includes('Aprobada'))
+          .reduce((acc, t) => acc + (t.totalAmount ?? 0), 0)
   );
   totalRetirado = computed(() =>
-    this.filteredTransactions().reduce((acc, t) => acc + this.num(t.returnAmount ?? 0), 0)
+    this.filteredTransactions().reduce((acc, t) => acc + (t.returnAmount ?? 0), 0)
   );
-
+  
   ngOnInit(): void {
     const _user = localStorage.getItem('User');
     if (_user == null) {
       this.Exit();
       return;
     }
-    
-    this.cargarUbicaciones();
-    this.startRealtimeMonitoring();
+
+    this.initializeDashboard();
+  }
+
+  private async initializeDashboard() {
+    try {
+      this.initialLoading.set(true);
+
+      await this.cargarUbicaciones();
+
+      this.startRealtimeMonitoring();
+
+      this.initialLoading.set(false);
+    } catch (error) {
+      this.toastService.error('Error', 'No se pudieron cargar los datos iniciales');
+      this.initialLoading.set(false);
+    }
   }
 
   ngAfterViewInit(): void {
@@ -212,13 +230,10 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
           this.applyFilter();
           this.redrawMarkers();
 
-        },
-        error: (err) => {
-          console.error('Error al cargar paypads o subscriptions:', err);
-        },
+        }
       });
     } catch (err) {
-      console.error('Error en cargarUbicaciones:', err);
+      console.error('No se pudieron cargar las ubicaciones', err);
     }
     
   }
@@ -260,7 +275,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
 
   focusOnPaypad(paypad: PayPad) {
     this.selectedPayPad.set(paypad);
-    
+    this.totalRecaudado();
     this.resetAllMarkersSize();
 
     const marker = this.markersMap.get(paypad.id);
@@ -293,20 +308,20 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     });
   }
 
+
   private iconForStatus(status?: number): string {
     switch (status) {
       case 1:
-        return 'ActiveMarker-removebg-preview.png';
-      case 0:
-        return 'offMarker-removebg-preview.png';
+        return 'ActiveMarker-removebg-preview.png';        
       case 2:
-        return 'NoConnectionMarker-removebg-preview.png';
+        return 'NoConnectionMarker-removebg-preview.png'; 
       case 3:
-        return 'NoInternetMarker-removebg-preview.png';
+        return 'NoInternetMarker-removebg-preview.png'; 
       case 4:
-        return 'NoMoneyMarker-removebg-preview.png';
+        return 'NoMoneyMarker-removebg-preview.png'; 
+      case 0:
       default:
-        return 'AllMarker-removebg-preview.png';
+        return 'offMarker-removebg-preview.png';
     }
   }
 
@@ -341,7 +356,6 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Error al cargar transacciones:', err);
         this.error.set('No fue posible cargar las transacciones.');
         this.loading.set(false);
       },
@@ -376,17 +390,22 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     });
   }
 
-  private num(v: any): number {
-    const n = Number(v);
-    return isNaN(n) ? 0 : n;
-  }
-
   private markersMap = new Map<number, MarkerWithUrl>();
 
-  private mapAlertToStatus(idAlert: number): number {
-    if (idAlert === 1) return 4;
-    return idAlert;
-  }
+
+private mapAlertToStatus(idAlert: number): number {
+  const mapping: { [key: number]: number } = {
+    1: 4,  // Alerta excases en baúles 
+    2: 1,  // INTERNET OK 
+    3: 2,  // FALLO PERIFERICOS
+    4: 2,  // FALLO DISPENSADOR
+    5: 4,  // DISPOSITIVO SIN DINERO
+    6: 2,  // DATAFONO
+    7: 3,  // ERROR TERCERO
+  };
+
+  return mapping[idAlert] ?? 0;  // Default: Apagado
+}
 
   private mergeSubscriptions(): void {
     if (!this.subscriptions || !this.subscriptions.length || !this.paypads.length) return;

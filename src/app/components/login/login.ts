@@ -1,4 +1,3 @@
-// components/login/login.ts
 import { Component, inject, signal } from '@angular/core';
 import { ChangeDetectionStrategy } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';

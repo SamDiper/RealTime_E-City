@@ -4,14 +4,10 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { LoginDto } from '../Interfaces/login';
 import { Response } from '../Interfaces/response';
 import { Observable } from 'rxjs';
-//import * as CryptoJS from 'crypto-js';
 import { JSEncrypt } from 'jsencrypt';
 import { PayPadResponse, SubscriptionResponse } from '../Interfaces/locations';
 import { TransactionResponse } from '../Interfaces/transactions';
 
-
-declare var require: any;
-//const forge = require('node-forge'); 
 
 @Injectable({
   providedIn: 'root'
@@ -46,7 +42,6 @@ export class Api {
       if (!encrypted) {
         throw new Error('Falló la encriptación de la contraseña');
       }
-      console.log(encrypted)
       return encrypted;
     }
 

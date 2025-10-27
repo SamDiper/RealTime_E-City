@@ -108,9 +108,8 @@ export class Transactions implements OnInit {
 
       }
     } catch (error) {
-      console.error('Error cargando datos:', error);
       this.toastService.error(
-        '❌ Error',
+        'Error',
         'No se pudieron cargar las transacciones'
       );
     } finally {
@@ -121,7 +120,7 @@ export class Transactions implements OnInit {
   private startAutoRefresh() {
     setInterval(() => {
       this.loadData();
-    }, 60000); // 1 minutos
+    }, 120000); // 1 minutos
   }
 
   getPayPadName(id: number): string {

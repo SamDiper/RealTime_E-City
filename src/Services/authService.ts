@@ -48,7 +48,6 @@ export class Auth {
 
       return util.encode64(encryptedData);
     } catch (error) {
-      console.error('❌ Error al encriptar contraseña:', error);
       throw new Error('No se pudo encriptar la contraseña');
     }
   }
@@ -62,16 +61,7 @@ export class Auth {
       password: this.encryptPwd(credentials.password)  
     };
 
-    console.log('🔐 Enviando login con contraseña encriptada');
-
     return this.http.post(`${this.apiUrl}/Auth/Login`, encryptedCredentials, { headers }).pipe(
-      tap((response: any) => {
-        console.log('✅ Respuesta de login:', response);
-      }),
-      catchError(error => {
-        console.error('❌ Error en login:', error);
-        throw error;
-      })
     );
   }
 
@@ -84,16 +74,7 @@ export class Auth {
       password: this.encryptPwd(credentials.password) 
     };
 
-    console.log('🔐 Verificando contraseña encriptada');
-
     return this.http.post(`${this.apiUrl}/Auth/VerifyPwd`, encryptedCredentials, { headers }).pipe(
-      tap((response: any) => {
-        console.log('✅ Respuesta de verificación:', response);
-      }),
-      catchError(error => {
-        console.error('❌ Error al verificar contraseña:', error);
-        throw error;
-      })
     );
   }
 
@@ -115,7 +96,6 @@ export class Auth {
     return this.http.get(`${this.apiUrl}/Auth/Logout`, { headers }).pipe(
       tap(() => this.removeToken()),
       catchError(error => {
-        console.error('Error durante el logout:', error);
         this.removeToken();
         return of(null);
       })

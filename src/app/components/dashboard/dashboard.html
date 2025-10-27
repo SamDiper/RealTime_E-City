@@ -270,16 +270,8 @@
           type="button" 
           class="cursor-pointer flex flex-col items-center justify-center gap-1.5 p-3 lg:p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-yellow-400 hover:bg-yellow-50 hover:shadow-md transition-all font-semibold text-xs active:scale-95"
           (click)="setState(2)">
-          <img src="NoConnectionMarker-removebg-preview.png" alt="Periférico" class="w-6 h-6 lg:w-8 lg:h-8 object-contain">
-          <span class="text-center leading-tight">Periférico</span>
-        </button>
-
-        <button 
-          type="button" 
-          class="cursor-pointer flex flex-col items-center justify-center gap-1.5 p-3 lg:p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-red-400 hover:bg-red-50 hover:shadow-md transition-all font-semibold text-xs active:scale-95"
-          (click)="setState(0)">
-          <img src="offMarker-removebg-preview.png" alt="Apagadas" class="w-6 h-6 lg:w-8 lg:h-8 object-contain">
-          <span class="text-center">Apagadas</span>
+          <img src="NoConnectionMarker-removebg-preview.png" alt="Periféricos" class="w-6 h-6 lg:w-8 lg:h-8 object-contain">
+          <span class="text-center leading-tight">Periféricos</span>
         </button>
 
         <button 
@@ -296,6 +288,14 @@
           (click)="setState(4)">
           <img src="NoMoneyMarker-removebg-preview.png" alt="Sin Dinero" class="w-6 h-6 lg:w-8 lg:h-8 object-contain">
           <span class="text-center leading-tight">Sin Dinero</span>
+        </button>
+
+        <button 
+          type="button" 
+          class="cursor-pointer flex flex-col items-center justify-center gap-1.5 p-3 lg:p-4 bg-white border-2 border-gray-200 rounded-lg hover:border-red-400 hover:bg-red-50 hover:shadow-md transition-all font-semibold text-xs active:scale-95"
+          (click)="setState(0)">
+          <img src="offMarker-removebg-preview.png" alt="Apagadas" class="w-6 h-6 lg:w-8 lg:h-8 object-contain">
+          <span class="text-center">Apagadas</span>
         </button>
 
       </div>
@@ -441,6 +441,15 @@
                           @if (t.returnAmount > 0) {
                             <div class="bg-rose-50 text-rose-700 font-bold px-3 py-2 rounded-lg text-xs lg:text-sm whitespace-nowrap">
                               - {{ t.returnAmount | currency }}
+                            </div>
+                          }
+                          @if (
+                            t.typeTransaction.toLowerCase() !== "retiro" && 
+                            !t.stateTransaction.toLowerCase().includes('cancelada') && 
+                            !t.stateTransaction.toLowerCase().includes('iniciada')
+                          ) {
+                            <div class="bg-green-50 text-green-700 font-bold px-3 py-2 rounded-lg text-xs lg:text-sm whitespace-nowrap">
+                              {{ t.totalAmount | currency }}
                             </div>
                           }
                         </div>

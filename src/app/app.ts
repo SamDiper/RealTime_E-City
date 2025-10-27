@@ -1,4 +1,3 @@
-// app.component.ts
 import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -32,12 +31,10 @@ export class App implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
-    console.log('🚀 App Component inicializado - Iniciando polling global');
     this.startGlobalPolling();
   }
 
   ngOnDestroy(): void {
-    console.log('🛑 App Component destruido - Deteniendo polling global');
     this.pollingService.stopPolling();
   }
 
@@ -50,7 +47,6 @@ export class App implements OnInit, OnDestroy {
 
     this.pollingService.startSubscriptionsPolling(60000);
     
-    console.log('✅ Polling global iniciado - Los toasts se mostrarán automáticamente');
   }
 
   toggleSidebar() {

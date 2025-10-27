@@ -72,8 +72,7 @@ export class Charts implements OnInit {
             .map(p => p.id);
           
         }
-      },
-      error: (err) => console.error(err)
+      }
     });
   }
 
@@ -88,12 +87,10 @@ export class Charts implements OnInit {
           this.showEmptyState = false;
           
         } else {
-          console.log("Api:", res.message);
           this.renderFromTransactions([]);
         }
       },
       error: (err) => {
-        console.error(err);
         this.renderFromTransactions([]);
       }
     });
@@ -113,12 +110,10 @@ export class Charts implements OnInit {
           this.renderFromTransactions(txs);
           this.showEmptyState = false;
         } else {
-          console.log("Api:", res.message);
           this.renderFromTransactions([]);
         }
       },
       error: (err) => {
-        console.error(err);
         this.renderFromTransactions([]);
       }
     });
