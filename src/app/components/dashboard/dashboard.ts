@@ -455,7 +455,7 @@ private mapAlertToStatus(idAlert: number): number {
     });
 
     this.isPolling.set(true);
-    this.pollingService.startSubscriptionsPolling(300000);
+    this.pollingService.startSubscriptionsPolling(150000);
   
   }
   

@@ -58,7 +58,7 @@ export class App implements OnInit, OnDestroy {
       }
     });
 
-    this.pollingService.startSubscriptionsPolling(300000);// 5min
+    this.pollingService.startSubscriptionsPolling(150000);// 2min 30s
   }
 
   toggleSidebar() {

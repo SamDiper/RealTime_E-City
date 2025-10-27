@@ -134,7 +134,7 @@ export class PollingService {
         this.toastService.info(
           `Cambio de Estado`,
           `${alert.paypad}: ${oldAlert?.alert} → ${alert.alert}`,
-          300000
+            150000// 2min 30s
         );
       });
     }
