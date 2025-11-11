@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
 import { JSEncrypt } from 'jsencrypt';
 import { PayPadResponse, SubscriptionResponse } from '../Interfaces/locations';
 import { TransactionResponse } from '../Interfaces/transactions';
+import { ConexionDto, ConexionesResponse, ConexionSingleResponse } from '../Interfaces/conexiones';
 
 
 @Injectable({
@@ -45,18 +46,18 @@ export class Api {
       return encrypted;
     }
 
- private getHeaders(includeAuth: boolean = false): HttpHeaders {
-  let headers: Record<string, string> = { ...this.GENERAL_HEADERS };
-  
-  if (includeAuth) {
-    const token = localStorage.getItem("token");
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+  private getHeaders(includeAuth: boolean = false): HttpHeaders {
+    let headers: Record<string, string> = { ...this.GENERAL_HEADERS };
+    
+    if (includeAuth) {
+      const token = localStorage.getItem("token");
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
     }
+    
+    return new HttpHeaders(headers);
   }
-  
-  return new HttpHeaders(headers);
-}
 
   Login(credentials: LoginDto): Observable<Response> {
     const headers = this.getHeaders();
@@ -137,6 +138,7 @@ export class Api {
       { headers }
     );
   }
+
   GetTransactionsById(idPaypad:number): Observable<TransactionResponse> {
     const headers = this.getHeaders(true);
     
@@ -177,6 +179,37 @@ export class Api {
     );
   }
 
+  GetAllConexiones(): Observable<ConexionesResponse> {
+    const headers = this.getHeaders(true);
+    return this.http.get<ConexionesResponse>(
+      `${environment.API_URL}/api/Conexion`,
+      { headers }
+    );
+  }
 
+  CreateConexion(data: ConexionDto): Observable<ConexionSingleResponse> {
+    const headers = this.getHeaders(true);
+    return this.http.post<ConexionSingleResponse>(
+      `${environment.API_URL}/api/Conexion`,
+      data,
+      { headers }
+    );
+  }
 
+  UpdateConexion(data: ConexionDto): Observable<ConexionSingleResponse> {
+    const headers = this.getHeaders(true);
+    return this.http.put<ConexionSingleResponse>(
+      `${environment.API_URL}/api/Conexion/`,
+      data,
+      { headers }
+    );
+  }
+
+  DeleteConexion(id: number): Observable<any> {
+    const headers = this.getHeaders(true);
+    return this.http.delete(
+      `${environment.API_URL}/api/Conexion/${id}`,
+      { headers }
+    );
+  }
 }

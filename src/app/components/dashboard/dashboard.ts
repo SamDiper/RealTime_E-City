@@ -198,15 +198,9 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
 
   private initMap(): void {
     
-    const colombiaBounds = L.latLngBounds(
-      L.latLng(-4.2316872, -79.0237629),
-      L.latLng(12.4373032, -66.8511907)
-    );
-
     this.map = L.map('map', {
       center: [4.59806, -74.0758],
       zoom: 5,
-      maxBounds: colombiaBounds,
       maxBoundsViscosity: 0.7,
       zoomAnimation: true,
       fadeAnimation: true,
