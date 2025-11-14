@@ -2,26 +2,71 @@
   
   <div class="max-w-7xl mx-auto mb-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div>
-        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-white mb-3 tracking-tight">
+      <div class="text-center">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-2 sm:mb-3 tracking-tight">
           Conexiones Remotas (Pay+)
         </h1>
-        <p class="text-sm sm:text-base text-gray-400">
+        <p class="text-xs sm:text-sm md:text-base text-gray-400">
           Gestión de conexiones agrupadas por PayPad
         </p>
       </div>
       
-      <div class="flex gap-3">
+      <div class="w-full sm:w-auto">
         <button
           (click)="abrirModal()"
-          class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+          class="w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
-          Nueva Conexión
+          <span class="text-sm sm:text-base">Nueva Conexión</span>
         </button>
       </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto mb-6">
+    <div class="bg-white rounded-xl shadow-md border border-gray-200 p-4">
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center">
+        <div>
+          <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="relative flex-1">
+          <input
+            type="text"
+            [ngModel]="terminoBusqueda()"
+            (ngModelChange)="actualizarBusqueda($event)"
+            placeholder="Buscar por PayPad, tipo de conexión, código, usuario..."
+            class="w-full pl-10 pr-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm placeholder:text-gray-500"
+          />
+        </div>
+
+        @if (terminoBusqueda()) {
+          <button
+            (click)="limpiarBusqueda()"
+            class="w-full sm:w-auto px-4 py-2.5 sm:py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span class="text-sm">Limpiar</span>
+          </button>
+        }
+      </div>
+
+      @if (terminoBusqueda()) {
+        <div class="mt-3 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+          <div class="h-2 w-2 bg-blue-500 rounded-full animate-pulse flex-shrink-0"></div>
+          <span class="text-blue-600 font-medium">
+            Buscando: "{{ terminoBusqueda() }}"
+          </span>
+          @if (totalResultados() === 0) {
+            <span class="text-red-500">- No se encontraron resultados</span>
+          }
+        </div>
+      }
     </div>
   </div>
 
@@ -31,30 +76,45 @@
       @if (loading()) {
         <div class="p-8 text-center">
           <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p class="text-gray-500">Cargando conexiones...</p>
+          <p class="text-gray-500 text-sm sm:text-base">Cargando conexiones...</p>
         </div>
       } @else if (error()) {
-        <div class="p-8 text-center">
-          <svg class="w-12 h-12 text-red-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="p-6 sm:p-8 text-center">
+          <svg class="w-10 h-10 sm:w-12 sm:h-12 text-red-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
-          <p class="text-red-600 font-medium">{{ error() }}</p>
+          <p class="text-red-600 font-medium text-sm sm:text-base mb-3">{{ error() }}</p>
           <button
             (click)="refresh()"
-            class="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
+            class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 text-sm sm:text-base"
           >
             Reintentar
           </button>
         </div>
       } @else if (gruposPorPaypad().length === 0) {
-        <div class="p-8 text-center">
-          <svg class="w-14 h-14 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-          </svg>
-          <p class="text-gray-500">No hay conexiones para mostrar</p>
+        <div class="p-6 sm:p-8 text-center">
+          @if (terminoBusqueda()) {
+            <svg class="w-12 h-12 sm:w-14 sm:h-14 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <p class="text-gray-500 mb-2 text-sm sm:text-base">No se encontraron conexiones que coincidan con:</p>
+            <p class="text-gray-700 font-semibold text-sm sm:text-base mb-3">"{{ terminoBusqueda() }}"</p>
+            <button
+              (click)="limpiarBusqueda()"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 text-sm sm:text-base"
+            >
+              Mostrar todas las conexiones
+            </button>
+          } @else {
+            <svg class="w-12 h-12 sm:w-14 sm:h-14 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+            <p class="text-gray-500 text-sm sm:text-base">No hay conexiones para mostrar</p>
+          }
         </div>
       } @else {
-        <div class="overflow-x-auto">
+        
+        <div class="hidden lg:block overflow-x-auto">
           <table class="w-full text-left">
             <thead class="bg-gray-50 border-b-2 border-gray-200">
               <tr>
@@ -65,22 +125,26 @@
             </thead>
             <tbody class="divide-y divide-gray-200">
               @for (grupo of gruposPorPaypad(); track grupo.paypad) {
-                
                 <tr class="bg-blue-50">
                   <td class="px-6 py-4" [attr.rowspan]="grupo.conexiones.length + 1">
                     <div class="flex items-center gap-3">
-                      <div class="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                      <div class="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
                         {{ grupo.paypad.charAt(0) }}
                       </div>
                       <div>
                         <div class="font-bold text-gray-900 text-lg">
                           {{ grupo.paypad }}
                         </div>
-                        <div class="text-xs text-blue-600 font-medium">
-                          PayPad ID: {{ grupo.idPaypad }}
-                        </div>
+                        @if (grupo.idPaypad && grupo.idPaypad !== 0) {
+                          <div class="text-xs text-blue-600 font-medium">
+                            PayPad ID: {{ grupo.idPaypad }}
+                          </div>
+                        }
                         <div class="text-xs text-gray-500">
                           {{ grupo.conexiones.length }} {{ grupo.conexiones.length === 1 ? 'conexión' : 'conexiones' }}
+                          @if (terminoBusqueda()) {
+                            <span class="text-green-600 ml-1">(filtradas)</span>
+                          }
                         </div>
                       </div>
                     </div>
@@ -94,7 +158,6 @@
                   <tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-6 py-4">
                       <div class="space-y-3">
-
                         <div class="flex items-center gap-2">
                           <span class="font-semibold text-gray-700">{{ conexion.name }}</span>
                           @if (conexion.name.toLowerCase().includes('teamviewer')) {
@@ -103,7 +166,6 @@
                             <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded">AD</span>
                           }
                         </div>
-
                         <div>
                           <label class="block text-xs text-gray-500 mb-1">Código de Conexión</label>
                           <input
@@ -111,14 +173,10 @@
                             [value]="conexion.description"
                             (input)="actualizarValor(conexion.id, 'description', $any($event.target).value)"
                             [disabled]="!conexion.isEditing"
-                            class="w-full px-3 py-2 border-2 rounded-lg text-sm font-mono
-                                   transition-all
-                                   disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-200
-                                   focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                            class="w-full px-3 py-2 border-2 rounded-lg text-sm font-mono transition-all disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                             placeholder="Código de conexión"
                           />
                         </div>
-
                         <div>
                           <label class="block text-xs text-gray-500 mb-1">Usuario</label>
                           <input
@@ -126,13 +184,10 @@
                             [value]="conexion.userName"
                             (input)="actualizarValor(conexion.id, 'userName', $any($event.target).value)"
                             [disabled]="!conexion.isEditing"
-                            class="w-full px-3 py-2 border-2 rounded-lg text-sm
-                                   disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-200
-                                   focus:ring-2 focus:ring-blue-500 outline-none"
+                            class="w-full px-3 py-2 border-2 rounded-lg text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
                             placeholder="Usuario"
                           />
                         </div>
-
                         <div>
                           <label class="block text-xs text-gray-500 mb-1">Contraseña</label>
                           <input
@@ -140,15 +195,12 @@
                             [value]="conexion.pwd"
                             (input)="actualizarValor(conexion.id, 'pwd', $any($event.target).value)"
                             [disabled]="!conexion.isEditing"
-                            class="w-full px-3 py-2 border-2 rounded-lg text-sm
-                                   disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-200
-                                   focus:ring-2 focus:ring-blue-500 outline-none"
+                            class="w-full px-3 py-2 border-2 rounded-lg text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
                             placeholder="Contraseña"
                           />
                         </div>
                       </div>
                     </td>
-
                     <td class="px-6 py-4">
                       <div class="flex flex-wrap gap-2">
                         <button
@@ -158,9 +210,17 @@
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                           </svg>
-                          Copiar
+                          Copiar Conexión
                         </button>
-
+                        <button
+                          (click)="copiarCodigo(conexion.pwd, conexion.name)"
+                          class="px-3 py-2 bg-cyan-600 hover:bg-cyan-700 text-white text-sm font-semibold rounded-lg flex items-center gap-2 transition-all active:scale-95"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          Copiar Contraseña
+                        </button>
                         @if (!conexion.isEditing) {
                           <button
                             (click)="habilitarEdicion(conexion.id)"
@@ -182,7 +242,6 @@
                             Cancelar
                           </button>
                         }
-
                         <button
                           (click)="guardarConexion(conexion)"
                           [disabled]="!conexion.isEditing"
@@ -195,7 +254,6 @@
                           </svg>
                           Guardar
                         </button>
-
                         <button
                           (click)="eliminarConexion(conexion.id, conexion.name)"
                           class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg flex items-center gap-2 transition-all active:scale-95"
@@ -213,6 +271,153 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Vista móvil igual pero con la misma corrección del ID -->
+        <div class="lg:hidden">
+          @for (grupo of gruposPorPaypad(); track grupo.paypad) {
+            <div class="border-b-4 border-blue-200 last:border-b-0">
+              <div class="bg-blue-50 p-4 sticky top-0 z-10">
+                <div class="flex items-center gap-3">
+                  <div class="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-base sm:text-lg flex-shrink-0">
+                    {{ grupo.paypad.charAt(0) }}
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="font-bold text-gray-900 text-base sm:text-lg truncate">
+                      {{ grupo.paypad }}
+                    </div>
+                    @if (grupo.idPaypad && grupo.idPaypad !== 0) {
+                      <div class="text-xs text-blue-600 font-medium">
+                        PayPad ID: {{ grupo.idPaypad }}
+                      </div>
+                    }
+                    <div class="text-xs text-gray-500">
+                      {{ grupo.conexiones.length }} {{ grupo.conexiones.length === 1 ? 'conexión' : 'conexiones' }}
+                      @if (terminoBusqueda()) {
+                        <span class="text-green-600 ml-1">(filtradas)</span>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              @for (conexion of grupo.conexiones; track conexion.id) {
+                <div class="p-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors">
+                  <div class="flex items-center gap-2 mb-4">
+                    <span class="font-semibold text-gray-700 text-sm sm:text-base">{{ conexion.name }}</span>
+                    @if (conexion.name.toLowerCase().includes('teamviewer')) {
+                      <span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded">TV</span>
+                    } @else if (conexion.name.toLowerCase().includes('anydesk')) {
+                      <span class="px-2 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded">AD</span>
+                    }
+                  </div>
+
+                  <div class="space-y-3 mb-4">
+                    <div>
+                      <label class="block text-xs text-gray-500 mb-1">Código de Conexión</label>
+                      <input
+                        type="text"
+                        [value]="conexion.description"
+                        (input)="actualizarValor(conexion.id, 'description', $any($event.target).value)"
+                        [disabled]="!conexion.isEditing"
+                        class="w-full px-3 py-2 border-2 rounded-lg text-sm font-mono transition-all disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        placeholder="Código de conexión"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-xs text-gray-500 mb-1">Usuario</label>
+                      <input
+                        type="text"
+                        [value]="conexion.userName"
+                        (input)="actualizarValor(conexion.id, 'userName', $any($event.target).value)"
+                        [disabled]="!conexion.isEditing"
+                        class="w-full px-3 py-2 border-2 rounded-lg text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                        placeholder="Usuario"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-xs text-gray-500 mb-1">Contraseña</label>
+                      <input
+                        [type]="conexion.isEditing ? 'text' : 'password'"
+                        [value]="conexion.pwd"
+                        (input)="actualizarValor(conexion.id, 'pwd', $any($event.target).value)"
+                        [disabled]="!conexion.isEditing"
+                        class="w-full px-3 py-2 border-2 rounded-lg text-sm disabled:bg-gray-100 disabled:text-gray-500 disabled:border-gray-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                        placeholder="Contraseña"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <button
+                      (click)="copiarCodigo(conexion.description, conexion.name)"
+                      class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm font-semibold rounded-lg flex items-center justify-center gap-2 transition-all active:scale-95"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      <span>Copiar Conexión</span>
+                    </button>
+                    <button
+                      (click)="copiarCodigo(conexion.pwd, conexion.name)"
+                      class="px-3 py-2 bg-cyan-600 hover:bg-cyan-700 text-white text-xs sm:text-sm font-semibold rounded-lg flex items-center justify-center gap-2 transition-all active:scale-95"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      <span>Copiar Contraseña</span>
+                    </button>
+                    
+                    @if (!conexion.isEditing) {
+                      <button
+                        (click)="habilitarEdicion(conexion.id)"
+                        class="px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm font-semibold rounded-lg flex items-center justify-center gap-2 transition-all active:scale-95"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        <span>Editar</span>
+                      </button>
+                    } @else {
+                      <button
+                        (click)="cancelarEdicion(conexion.id)"
+                        class="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-xs sm:text-sm font-semibold rounded-lg flex items-center justify-center gap-2 transition-all active:scale-95"
+                      >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <span>Cancelar</span>
+                      </button>
+                    }
+                    
+                    <button
+                      (click)="guardarConexion(conexion)"
+                      [disabled]="!conexion.isEditing"
+                      class="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-semibold rounded-lg flex items-center justify-center gap-2 transition-all active:scale-95"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+                        <polyline points="17 21 17 13 7 13 7 21" />
+                        <polyline points="7 3 7 8 15 8" />
+                      </svg>
+                      <span>Guardar</span>
+                    </button>
+                    
+                    <button
+                      (click)="eliminarConexion(conexion.id, conexion.name)"
+                      class="sm:col-span-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm font-semibold rounded-lg flex items-center justify-center gap-2 transition-all active:scale-95"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      <span>Eliminar</span>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
       }
     </div>
   </div>
@@ -225,11 +430,11 @@
       (click)="cerrarModal()"
     ></div>
 
-    <div class="flex min-h-full items-center justify-center p-4">
-      <div class="relative bg-white rounded-xl shadow-2xl max-w-2xl w-full transform transition-all">
+    <div class="flex min-h-full items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="relative bg-white rounded-t-xl sm:rounded-xl shadow-2xl max-w-2xl w-full transform transition-all">
         
-        <div class="flex items-center justify-between p-6 border-b border-gray-200">
-          <h3 class="text-2xl font-bold text-gray-900">
+        <div class="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+          <h3 class="text-xl sm:text-2xl font-bold text-gray-900">
             Nueva Conexión
           </h3>
           <button
@@ -242,119 +447,124 @@
           </button>
         </div>
 
-        <div class="p-6">
+        <div class="p-4 sm:p-6 max-h-[60vh] sm:max-h-[70vh] overflow-y-auto">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             
-            <div>
+            <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                PayPad
-              </label>
-              
-              @if (paypadsFiltrados().length === 0) {
-                <div class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg bg-gray-50 text-gray-500 flex items-center gap-2">
-                  <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span>Cargando PayPads...</span>
-                </div>
-              } @else {
-                <select
-                  [ngModel]="formData().idPaypad"
-                  (change)="seleccionarPaypad($event)"
-                  class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
-                >
-                  <option value="0">Selecciona un PayPad...</option>
-                  @for (paypad of paypadsFiltrados(); track paypad.id) {
-                    <option [value]="paypad.id">
-                      ID: {{ paypad.id }} - {{ paypad.username }}
-                    </option>
-                  }
-                </select>
-                
-                @if (formData().idPaypad) {
-                  <p class="text-xs text-green-600 mt-1 flex items-center gap-1">
-                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
-                    Seleccionado: ID {{ formData().idPaypad }} - {{ formData().paypad }}
-                  </p>
-                }
-              }
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Tipo de Conexión
+                PayPad <span class="text-red-500">*</span>
               </label>
               <input
+                type="text"
+                [ngModel]="formData().paypad"
+                (ngModelChange)="actualizarPaypad($event)"
+                list="paypadsList"
+                placeholder="Escribe o selecciona un PayPad..."
+                class="w-full px-3 sm:px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-sm placeholder:text-gray-400"
+                autocomplete="off"
+              />
+              <datalist id="paypadsList">
+                @for (paypad of paypadsFiltrados(); track paypad.id) {
+                  <option [value]="paypad.username">{{ paypad.username }} (ID: {{ paypad.id }})</option>
+                }
+              </datalist>
+              <p class="mt-1 text-xs text-gray-500">
+                Selecciona uno existente o escribe un nuevo nombre
+              </p>
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Tipo de Conexión <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
                 [ngModel]="formData().name"
-                placeholder="Ingresar el tipo de conexión"
                 (ngModelChange)="actualizarFormData('name', $event)"
-                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none placeholder:text-gray-500"
+                list="tiposConexion"
+                placeholder="Ej: TeamViewer, AnyDesk, VPN, RDP..."
+                class="w-full px-3 sm:px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-sm placeholder:text-gray-400"
+              />
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                Código de Conexión <span class="text-red-500">*</span>
+              </label>
+              <input
+                rows="2"
+                [ngModel]="formData().description"
+                (ngModelChange)="actualizarFormData('description', $event)"
+                placeholder="Ingresar el código de conexión..."
+                class="w-full px-3 sm:px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none text-sm placeholder:text-gray-400"
               >
             </div>
 
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                Código de Conexión
+                Máquina / Lugar
               </label>
               <input
                 type="text"
-                placeholder="Ingresar el código de conexión"
-                [ngModel]="formData().description"
-                (ngModelChange)="actualizarFormData('description', $event)"
-                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none placeholder:text-gray-500"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Maquina / Lugar
-              </label>
-              <input
-                type="text"
-                placeholder="admin"
+                placeholder="Ej: PC-Caja, Servidor Principal, admin..."
                 [ngModel]="formData().userName"
                 (ngModelChange)="actualizarFormData('userName', $event)"
-                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none placeholder:text-gray-500"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">
-                Contraseña (opcional)
-              </label>
-              <input
-                type="text"
-                placeholder="••••••••"
-                [ngModel]="formData().pwd"
-                (ngModelChange)="actualizarFormData('pwd', $event)"
-                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none placeholder:text-gray-500"
+                class="w-full px-3 sm:px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none placeholder:text-gray-400 text-sm"
               />
             </div>
 
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700 mb-2">
-                URL Tutorial (opcional)
+                Contraseña
               </label>
               <input
                 type="text"
+                placeholder="Contraseña de acceso..."
+                [ngModel]="formData().pwd"
+                (ngModelChange)="actualizarFormData('pwd', $event)"
+                class="w-full px-3 sm:px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none placeholder:text-gray-400 text-sm"
+              />
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                URL Tutorial
+              </label>
+              <input
+                type="url"
                 placeholder="https://..."
                 [ngModel]="formData().icon"
                 (ngModelChange)="actualizarFormData('icon', $event)"
-                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 outline-none placeholder:text-gray-500"
+                class="w-full px-3 sm:px-4 py-2.5 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none placeholder:text-gray-400 text-sm"
               />
             </div>
 
           </div>
+
+          @if (formData().paypad || formData().name) {
+            <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p class="text-xs font-semibold text-blue-700 mb-2">📋 Vista Previa:</p>
+              <div class="text-xs text-blue-600 space-y-1">
+                <p><strong>PayPad:</strong> {{ formData().paypad || '(vacío)' }}</p>
+                <p><strong>ID PayPad:</strong> {{ formData().idPaypad || 0 }}</p>
+                <p><strong>Tipo:</strong> {{ formData().name || '(vacío)' }}</p>
+                <p><strong>Código:</strong> {{ formData().description || '(vacío)' }}</p>
+              </div>
+            </div>
+          }
         </div>
 
-        <div class="flex gap-3 p-6 border-t border-gray-200">
+        <div class="flex flex-col sm:flex-row gap-3 p-4 sm:p-6 border-t border-gray-200">
+          <button
+            (click)="cerrarModal()"
+            class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 rounded-lg transition-all text-sm sm:text-base"
+          >
+            Cancelar
+          </button>
           <button
             (click)="crearConexion()"
             [disabled]="loading()"
-            class="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2"
+            class="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             @if (loading()) {
               <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -368,17 +578,6 @@
               </svg>
               <span>Crear Conexión</span>
             }
-          </button>
-
-          <button
-            (click)="cerrarModal()"
-            [disabled]="loading()"
-            class="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            <span>Cancelar</span>
           </button>
         </div>
 

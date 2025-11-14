@@ -200,7 +200,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     
     this.map = L.map('map', {
       center: [4.59806, -74.0758],
-      zoom: 5,
+      zoom: 7,
       maxBoundsViscosity: 0.7,
       zoomAnimation: true,
       fadeAnimation: true,
@@ -232,6 +232,11 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     
   }
 
+  refresh() {
+    this.toastService.info('Actualizando', 'Obteniendo Ubicaciones...');
+    this.cargarUbicaciones();
+  }
+
   private redrawMarkers(): void {
     if (!this.map) return;
 
@@ -239,7 +244,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     this.markers = [];
     this.markersMap.clear();
 
-    for (const ubicacion of this.filteredPaypads) {
+    for (const ubicacion of this.filteredPaypads) { 
       const lat = Number(ubicacion.latitude);
       const lng = Number(ubicacion.longitude);
       if (isNaN(lat) || isNaN(lng)) continue;
@@ -295,7 +300,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     this.resetAllMarkersSize();
     this.currentFocusedMarkerId = null;
     
-    this.map?.flyTo([4.59806, -74.0758], 5, {
+    this.map?.flyTo([4.59806, -74.0754], 7, {
       animate: true,
       duration: 1.5,
       easeLinearity: 0.25,
