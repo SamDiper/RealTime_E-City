@@ -227,7 +227,6 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
         }
       });
     } catch (err) {
-      console.error('No se pudieron cargar las ubicaciones', err);
     }
     
   }
