@@ -1,6 +1,5 @@
 <div class="min-h-screen bg-gray-800 p-4 sm:p-6 lg:p-8">
   
-  <!-- Header -->
   <div class="max-w-7xl mx-auto mb-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div class="text-center">
@@ -107,7 +106,6 @@
         </div>
       } @else {
         
-        <!-- Vista Desktop -->
         <div class="hidden lg:block overflow-x-auto">
           <table class="w-full text-left">
             <thead class="bg-gray-50 border-b-2 border-gray-200">
@@ -435,7 +433,6 @@
   </div>
 </div>
 
-<!-- Modal Nueva Conexión -->
 @if (showModal()) {
   <div class="fixed inset-0 z-50 overflow-y-auto">
     <div class="fixed inset-0 bg-black/50 transition-opacity" (click)="cerrarModal()"></div>
@@ -559,7 +556,6 @@
   </div>
 }
 
-<!-- Modal Video -->
 @if (showVideoModal()) {
   <div class="fixed inset-0 z-50 overflow-y-auto">
     <div class="fixed inset-0 bg-black/80 transition-opacity" (click)="cerrarModalVideo()"></div>
