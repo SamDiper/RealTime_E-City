@@ -130,6 +130,15 @@ export class Api {
     );
   }
 
+  GetAllResumen(): Observable<any> {
+    const headers = this.getHeaders(true);
+    
+    return this.http.get<any>(
+      `${environment.API_URL}/api/Transaction/GetResumen`,
+      { headers }
+    );
+  }
+
   GetAllSubscriptions(): Observable<SubscriptionResponse> {
     const headers = this.getHeaders(true);
     

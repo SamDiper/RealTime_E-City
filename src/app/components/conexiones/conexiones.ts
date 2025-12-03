@@ -57,7 +57,6 @@ export class Conexiones implements OnInit, OnDestroy {
   
   safeVideoUrl = computed<SafeResourceUrl | null>(() => {
     const url = this.videoUrl();
-    console.log(url);
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   });
 

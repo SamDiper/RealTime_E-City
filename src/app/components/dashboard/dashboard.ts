@@ -27,6 +27,7 @@ import {
 import { Transaction, TransactionResponse } from '../../../Interfaces/transactions';
 import { PollingService } from '../../../Services/pollingService';
 import { ToastService } from '../../../Services/toastService';
+import { Resumen } from '../../../Interfaces/response';
 
 type PaymentOption = { label: string; value: string | null };
 type MarkerWithUrl = L.Marker & { customIconUrl: string; paypadId: number };
@@ -60,6 +61,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
   paypads: PayPad[] = [];
   subscriptions: PaypadAlert[] = [];
   filteredPaypads: PayPad[] = [];
+  resumen: Resumen | null = null;
 
   private filterState = -1;
 
@@ -129,8 +131,8 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
       this.Exit();
       return;
     }
-
     this.initializeDashboard();
+    this.startAutoRefresh();
   }
 
   private async initializeDashboard() {
@@ -138,6 +140,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
       this.initialLoading.set(true);
 
       await this.cargarUbicaciones();
+      await this.cargarResumen();
 
       this.startRealtimeMonitoring();
 
@@ -231,9 +234,24 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy, OnChanges {
     
   }
 
+    private async cargarResumen(): Promise<void> {
+    try {
+      const transactions = await this._api.GetAllResumen();
+      transactions.subscribe({
+        next: (data: any) => {
+          this.resumen = data.response;          
+        }
+      });
+    } catch (err) {
+    }
+    
+  }
+
+
   refresh() {
     this.toastService.info('Actualizando', 'Obteniendo Ubicaciones...');
     this.cargarUbicaciones();
+    this.cargarResumen();
   }
 
   private redrawMarkers(): void {
@@ -456,5 +474,10 @@ private mapAlertToStatus(idAlert: number): number {
     this.pollingService.startSubscriptionsPolling(150000);
   
   }
-  
+
+  private startAutoRefresh() {
+    setInterval(() => {
+      this.initializeDashboard();
+    }, 300000); // 5min
+  }
 }

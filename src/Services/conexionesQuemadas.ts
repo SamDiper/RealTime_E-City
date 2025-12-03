@@ -571,20 +571,4 @@ export class conexionesQuemadas {
     return this.MOCK_CONEXIONES.some(c => c.idPaypad === idPaypad);
   }
 
-  /**
-   * Obtener estadísticas
-   */
-  getStats(): { total: number; porPaypad: Map<number, number> } {
-    const porPaypad = new Map<number, number>();
-    
-    this.MOCK_CONEXIONES.forEach(c => {
-      const count = porPaypad.get(c.idPaypad!) || 0;
-      porPaypad.set(c.idPaypad!, count + 1);
-    });
-
-    return {
-      total: this.MOCK_CONEXIONES.length,
-      porPaypad
-    };
-  }
 }
