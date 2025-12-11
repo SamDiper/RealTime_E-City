@@ -2,8 +2,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, Observable, of, tap } from 'rxjs';
-import { pki, util } from 'node-forge';  
 import { environment } from '../Environments/environment.development';
+import * as forge from 'node-forge';
 
 export interface LoginCredentials {
   userName: string;
@@ -42,11 +42,11 @@ export class Auth {
       });
       publicKeyPem += '-----END PUBLIC KEY-----';
 
-      const publicKey = pki.publicKeyFromPem(publicKeyPem);
+      const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);
 
       const encryptedData = publicKey.encrypt(pwd, 'RSA-OAEP');
 
-      return util.encode64(encryptedData);
+      return forge.util.encode64(encryptedData);
     } catch (error) {
       throw new Error('No se pudo encriptar la contraseña');
     }
